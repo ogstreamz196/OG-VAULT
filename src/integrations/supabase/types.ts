@@ -17,6 +17,7 @@ export type Database = {
       apps: {
         Row: {
           apk_url: string | null
+          audiences: string[]
           banner_url: string | null
           build_number: number
           category_id: string | null
@@ -37,6 +38,7 @@ export type Database = {
         }
         Insert: {
           apk_url?: string | null
+          audiences?: string[]
           banner_url?: string | null
           build_number?: number
           category_id?: string | null
@@ -57,6 +59,7 @@ export type Database = {
         }
         Update: {
           apk_url?: string | null
+          audiences?: string[]
           banner_url?: string | null
           build_number?: number
           category_id?: string | null
@@ -261,6 +264,7 @@ export type Database = {
         Returns: Json
       }
       redeem_vip_for_me: { Args: { _code: string }; Returns: Json }
+      user_level: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
