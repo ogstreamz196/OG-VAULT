@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { normalizeUsername, usernameError, usernameToEmail } from "@/lib/access";
+import { vaultSignIn } from "@/lib/vault.functions";
 import vaultLogo from "@/assets/og-vault-logo.jpg.asset.json";
 
 const field =
@@ -9,7 +9,6 @@ const field =
 const btn = "tv-focus rounded-xl px-6 py-3.5 sm:py-4 text-base sm:text-lg font-bold";
 
 export function SignIn() {
-  const [mode, setMode] = useState<"in" | "up">("in");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -18,19 +17,15 @@ export function SignIn() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const uErr = usernameError(username);
-    if (uErr) return setError(uErr);
-    if (password.length < 6) return setError("Password must be at least 6 characters");
+    if (!username.trim() || !password) return setError("Enter your OG Vault ID and PIN");
     setBusy(true);
-    const email = usernameToEmail(username);
-    const res = mode === "in"
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password, options: { data: { username: normalizeUsername(username) } } });
-    setBusy(false);
-    if (res.error) {
-      const msg = res.error.message;
-      setError(/invalid login/i.test(msg) ? "Wrong username or password" : /already registered/i.test(msg) ? "That username is taken" : msg);
-    }
+    try {
+      const r = await vaultSignIn({ data: { username, password } });
+      if (!r.ok) { setError(r.error); return; }
+      const { error } = await supabase.auth.signInWithPassword({ email: r.email, password: r.token });
+      if (error) setError("Could not unlock the vault, try again");
+    } catch { setError("Could not reach the vault, try again"); }
+    finally { setBusy(false); }
   }
 
   async function google() {
@@ -56,16 +51,13 @@ export function SignIn() {
       <form onSubmit={submit} className="glass animate-rise-in relative mt-8 w-full max-w-md space-y-4 rounded-3xl p-5 sm:mt-10 sm:max-w-xl sm:space-y-5 sm:p-8">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-glow">Vault access</p>
-          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{mode === "in" ? "Enter the vault" : "Create your key"}</h1>
+          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">Enter the vault</h1>
         </div>
-        <input data-nav data-nav-autofocus className={field} placeholder="Username" autoComplete="username" autoCapitalize="none" autoCorrect="off" value={username} onChange={(e) => setUsername(e.target.value)} />
-        <input data-nav className={field} type="password" placeholder="Password" autoComplete={mode === "in" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} />
+        <input data-nav data-nav-autofocus className={field} placeholder="OG Vault ID" autoComplete="username" autoCapitalize="none" autoCorrect="off" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input data-nav className={field} type="password" placeholder="PIN" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && <p role="alert" className="rounded-xl border border-vip/60 bg-vip/15 px-4 py-3 text-base sm:text-lg">{error}</p>}
         <button data-nav type="submit" disabled={busy} className={`${btn} w-full bg-primary text-primary-foreground disabled:opacity-60`}>
-          {busy ? "Unlocking…" : mode === "in" ? "Sign in" : "Create account"}
-        </button>
-        <button data-nav type="button" onClick={() => { setMode(mode === "in" ? "up" : "in"); setError(null); }} className={`${btn} w-full bg-secondary text-secondary-foreground`}>
-          {mode === "in" ? "New here? Create an account" : "Have an account? Sign in"}
+          {busy ? "Unlocking…" : "Sign in"}
         </button>
         <button data-nav type="button" onClick={google} className="tv-focus w-full rounded-xl py-2 text-sm text-muted-foreground">
           D.EV MODE

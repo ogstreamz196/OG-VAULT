@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AppIdRouteImport } from './routes/app.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as ApiPublicOgVaultRouteImport } from './routes/api/public/og-vault'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOgVaultRoute = ApiPublicOgVaultRouteImport.update({
+  id: '/api/public/og-vault',
+  path: '/api/public/og-vault',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/api/public/og-vault': typeof ApiPublicOgVaultRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/api/public/og-vault': typeof ApiPublicOgVaultRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,21 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/api/public/og-vault': typeof ApiPublicOgVaultRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/app/$id' | '/category/$slug'
+  fullPaths:
+    '/' | '/admin' | '/app/$id' | '/category/$slug' | '/api/public/og-vault'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/app/$id' | '/category/$slug'
-  id: '__root__' | '/' | '/admin' | '/app/$id' | '/category/$slug'
+  to: '/' | '/admin' | '/app/$id' | '/category/$slug' | '/api/public/og-vault'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/app/$id'
+    | '/category/$slug'
+    | '/api/public/og-vault'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +83,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AppIdRoute: typeof AppIdRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  ApiPublicOgVaultRoute: typeof ApiPublicOgVaultRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +116,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/og-vault': {
+      id: '/api/public/og-vault'
+      path: '/api/public/og-vault'
+      fullPath: '/api/public/og-vault'
+      preLoaderRoute: typeof ApiPublicOgVaultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +131,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AppIdRoute: AppIdRoute,
   CategorySlugRoute: CategorySlugRoute,
+  ApiPublicOgVaultRoute: ApiPublicOgVaultRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

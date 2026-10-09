@@ -7,6 +7,7 @@ import { AppsManager } from "@/components/admin/AppsManager";
 import { CategoriesManager } from "@/components/admin/CategoriesManager";
 import { VipManager } from "@/components/admin/VipManager";
 import { MembersManager } from "@/components/admin/MembersManager";
+import { OgVaultApiCard } from "@/components/admin/OgVaultApiCard";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -57,7 +58,7 @@ function AdminPage() {
           <TabsContent value="apps"><AppsManager /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
           <TabsContent value="vip"><VipManager /></TabsContent>
-          <TabsContent value="members"><MembersManager /></TabsContent>
+          <TabsContent value="members" className="space-y-6"><OgVaultApiCard /><MembersManager /></TabsContent>
         </Tabs>
       </main>
     </div>
