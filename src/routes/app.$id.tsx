@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { installState, recordInstall, type InstallState } from "@/lib/installed";
 import { appQuery } from "@/lib/catalog";
 import { canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,6 +31,8 @@ function AppDetail() {
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
+  const [inst, setInst] = useState<InstallState>("none");
+  useEffect(() => { if (app) setInst(installState(app)); }, [app]);
 
   const back = () => (shot ? setShot(null) : router.navigate({ to: "/" }));
 
@@ -39,6 +42,8 @@ function AppDetail() {
     setProgress(0);
     try {
       const r = await downloadAndInstallApk(app.apk_url, `${app.package_name || app.title}-${app.version}`, setProgress);
+      recordInstall(app);
+      setInst("installed");
       setStatus(r === "installed" ? "Installer opened — confirm on screen." : "Download complete.");
     } catch (e) {
       setStatus(e instanceof Error ? e.message : "Download failed");
@@ -86,7 +91,7 @@ function AppDetail() {
               <div className="flex items-center gap-4 pt-2">
                 {allowed ? (
                   <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
-                    {progress !== null ? `Downloading ${progress}%` : isNative() ? "Download & Install" : "Download APK"}
+                    {progress !== null ? `Downloading ${progress}%` : inst === "update" ? "Update available — Install" : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
                   </button>
                 ) : (
                   <div className="flex items-center gap-4">
