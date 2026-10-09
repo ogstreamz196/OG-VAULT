@@ -4,7 +4,7 @@ import { useState } from "react";
 import { appQuery } from "@/lib/catalog";
 import { canInstall } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
-import { StoreGate } from "@/components/tv/StoreGate";
+import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 
@@ -19,14 +19,14 @@ export const Route = createFileRoute("/app/$id")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <StoreGate><AppDetail /></StoreGate>,
+  component: AppDetail,
 });
 
 function AppDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
   const { data: app, isLoading } = useQuery(appQuery(id));
-  const { user, isVip } = useAuth();
+  const { user, isVip, ready } = useAuth();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
@@ -47,6 +47,8 @@ function AppDetail() {
     }
   }
 
+  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!user) return <TvShell key="signin" onBack={() => {}}><SignIn /></TvShell>;
   if (isLoading) return <TvShell><p className="p-14 text-2xl text-muted-foreground">Loading…</p></TvShell>;
   if (!app)
     return (
@@ -62,7 +64,7 @@ function AppDetail() {
   const cat = (app as { categories?: { name: string } | null }).categories?.name;
 
   return (
-    <TvShell onBack={back} nested>
+    <TvShell onBack={back}>
       <div className="relative min-h-screen">
         {app.banner_url && <img src={app.banner_url} alt="" className="absolute inset-x-0 top-0 h-[460px] w-full object-cover opacity-30" />}
         <div className="absolute inset-x-0 top-0 h-[460px]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
