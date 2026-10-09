@@ -38,7 +38,7 @@ export const saveVaultSync = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertBoss(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: { updated_at: string; enabled?: boolean; api_key?: string | null; status?: string; key_name?: string | null; active_count?: number | null; last_error?: string | null } = { updated_at: new Date().toISOString() };
     if (data.enabled !== undefined) patch.enabled = data.enabled;
     if (data.apiKey) Object.assign(patch, { api_key: data.apiKey, status: "not_configured", last_error: null, key_name: null });
     if (data.removeKey) Object.assign(patch, { api_key: null, enabled: false, status: "not_configured", key_name: null, active_count: null, last_error: null });
