@@ -1,6 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { getStorageMode, presignR2Upload } from "@/lib/r2.functions";
 
 export type AppRow = Tables<"apps">;
 export type CategoryRow = Tables<"categories">;
@@ -30,7 +31,6 @@ export const appQuery = (id: string) =>
 
 /** Uploads to Cloudflare R2 when the boss switched it on; otherwise built-in storage (10-year signed URL). */
 export async function uploadMedia(bucket: "app-media" | "apks", file: File): Promise<string> {
-  const { getStorageMode, presignR2Upload } = await import("@/lib/r2.functions");
   const mode = await getStorageMode();
   if (mode.r2) {
     const { uploadUrl, publicUrl } = await presignR2Upload({ data: { fileName: file.name, contentType: file.type, folder: bucket === "apks" ? "apks" : "media" } });
