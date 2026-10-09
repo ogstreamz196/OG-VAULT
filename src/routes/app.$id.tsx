@@ -87,7 +87,7 @@ function AppDetail() {
                   </button>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <span className="rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg">VIP access required to install this app</span>
+                    <span className="rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg">{session ? "VIP access required to install this app" : "Sign in on the home screen to install"}</span>
                     <Link data-nav data-nav-autofocus to="/" className="tv-focus rounded-xl bg-secondary px-6 py-4 font-semibold">Back to store</Link>
                   </div>
                 )}
