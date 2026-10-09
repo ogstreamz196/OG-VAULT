@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_install_events: {
+        Row: {
+          app_id: string
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          platform: string
+          user_id: string | null
+        }
+        Insert: {
+          app_id: string
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          platform?: string
+          user_id?: string | null
+        }
+        Update: {
+          app_id?: string
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          platform?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_install_events_app_id_fkey"
+            columns: ["app_id"]
+            isOneToOne: false
+            referencedRelation: "apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       apps: {
         Row: {
           apk_url: string | null

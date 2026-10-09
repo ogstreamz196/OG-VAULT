@@ -43,6 +43,13 @@
       "when": 1791587271181,
       "tag": "0005_r2_storage_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791589614013,
+      "tag": "0006_app_install_events",
+      "breakpoints": true
     }
   ]
 }
