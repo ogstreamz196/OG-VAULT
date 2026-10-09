@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
+import { generateStoreCopy } from "@/lib/ai-copy.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia, type AppRow, type CategoryRow } from "@/lib/catalog";
 import type { TablesInsert } from "@/integrations/supabase/types";
@@ -63,6 +65,20 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
   const [d, setD] = useState<Draft>(draft);
   const [busy, setBusy] = useState<string | null>(null);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }));
+  const [features, setFeatures] = useState("");
+  const gen = useServerFn(generateStoreCopy);
+
+  async function generate() {
+    if (!d.title.trim()) { toast.error("Add a title first"); return; }
+    setBusy("Grok is writing…");
+    try {
+      const r = await gen({ data: { title: d.title, category: categories.find((c) => c.id === d.category_id)?.name ?? "", features, changelog: d.changelog ?? "" } });
+      if ("error" in r && r.error) { toast.error(r.error); return; }
+      if ("description" in r) { set("description", r.description); set("changelog", r.releaseNotes); toast.success("Copy generated"); }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Generation failed");
+    } finally { setBusy(null); }
+  }
 
   async function upload(bucket: "app-media" | "apks", files: FileList | null, apply: (urls: string[]) => void) {
     if (!files?.length) return;
@@ -122,6 +138,12 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
           </F>
           <div className="flex items-center gap-3"><Switch checked={d.is_active ?? true} onCheckedChange={(v) => set("is_active", v)} /><Label>Active (visible in store)</Label></div>
           <div className="flex items-center gap-3"><Switch checked={d.is_featured ?? false} onCheckedChange={(v) => set("is_featured", v)} /><Label>Featured in hero</Label></div>
+        </div>
+        <div className="space-y-2 rounded-xl border border-glow/40 p-4">
+          <h3 className="font-semibold">✨ AI writer (Grok)</h3>
+          <F label="Key features (one per line)"><Textarea rows={3} value={features} placeholder={"4K playback\nNo buffering\nRemote friendly"} onChange={(e) => setFeatures(e.target.value)} /></F>
+          <p className="text-xs text-muted-foreground">Uses the title, category and changelog below. Results replace the Description and Changelog — review before saving.</p>
+          <Button type="button" variant="secondary" disabled={!!busy} onClick={generate}>Generate description & release notes</Button>
         </div>
         <F label="Description"><Textarea rows={4} value={d.description ?? ""} onChange={(e) => set("description", e.target.value)} /></F>
         <F label="Changelog"><Textarea rows={3} value={d.changelog ?? ""} onChange={(e) => set("changelog", e.target.value)} /></F>
