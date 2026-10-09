@@ -89,6 +89,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_vip: boolean
           name: string
           slug: string
           sort_order: number
@@ -96,6 +97,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_vip?: boolean
           name: string
           slug: string
           sort_order?: number
@@ -103,6 +105,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_vip?: boolean
           name?: string
           slug?: string
           sort_order?: number
@@ -139,6 +142,24 @@ export type Database = {
           require_active_status?: boolean
           timeout_ms?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          username?: string
         }
         Relationships: []
       }
@@ -193,6 +214,35 @@ export type Database = {
         }
         Relationships: []
       }
+      vip_members: {
+        Row: {
+          code_id: string | null
+          expires_at: string | null
+          granted_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id?: string | null
+          expires_at?: string | null
+          granted_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string | null
+          expires_at?: string | null
+          granted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vip_members_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "vip_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -205,10 +255,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_vip: { Args: { _user_id: string }; Returns: boolean }
       redeem_vip_code: {
         Args: { _code: string; _device: string }
         Returns: Json
       }
+      redeem_vip_for_me: { Args: { _code: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "user"
