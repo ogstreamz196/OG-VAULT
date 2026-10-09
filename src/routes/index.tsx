@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -95,7 +96,7 @@ function CategoryRowView({ category, apps, locked }: { category: CategoryRow; ap
       <div className="no-scrollbar flex gap-6 overflow-x-auto px-14 py-6">
         {locked ? (
           <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex h-64 w-[34rem] shrink-0 items-center gap-6 rounded-2xl border-vip/60 p-8">
-            <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-vip/20 text-4xl">🔒</span>
+            <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-vip/20 text-4xl"><Lock className="h-9 w-9 text-vip" /></span>
             <span className="text-left">
               <span className="block text-2xl font-extrabold">VIP user area</span>
               <span className="mt-1 block text-lg text-muted-foreground">{apps.length ? `${apps.length} VIP app${apps.length > 1 ? "s" : ""} inside. ` : ""}Press OK to enter your VIP code.</span>

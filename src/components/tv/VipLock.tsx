@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,7 +22,7 @@ export function VipLock({ title = "OG VIP ACCESS" }: { title?: string }) {
 
   return (
     <div className="glass mx-auto max-w-2xl space-y-6 rounded-3xl border-vip/50 p-10 text-center">
-      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-vip/20 text-4xl">🔒</div>
+      <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-vip/20 text-4xl"><Lock className="h-9 w-9 text-vip" /></div>
       <h2 className="text-4xl font-extrabold">{title}</h2>
       <p className="text-xl text-muted-foreground">VIP user area. Enter your VIP access code to unlock every VIP app.</p>
       <form onSubmit={redeem} className="space-y-4">
