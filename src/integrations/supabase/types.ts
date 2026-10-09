@@ -184,6 +184,54 @@ export type Database = {
         }
         Relationships: []
       }
+      vault_credentials: {
+        Row: {
+          active: boolean
+          external_id: string | null
+          id: string
+          note: string
+          password: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          active?: boolean
+          external_id?: string | null
+          id?: string
+          note?: string
+          password?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          active?: boolean
+          external_id?: string | null
+          id?: string
+          note?: string
+          password?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      vault_sync_meta: {
+        Row: {
+          id: number
+          last_event_at: string | null
+          last_ping_at: string | null
+        }
+        Insert: {
+          id?: number
+          last_event_at?: string | null
+          last_ping_at?: string | null
+        }
+        Update: {
+          id?: number
+          last_event_at?: string | null
+          last_ping_at?: string | null
+        }
+        Relationships: []
+      }
       vip_codes: {
         Row: {
           code: string
