@@ -52,7 +52,7 @@ function AdminPage() {
           <TabsList className="mb-6 flex-wrap">
             <TabsTrigger value="apps">Apps & Media</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="vip">VIP Codes</TabsTrigger>
+            <TabsTrigger value="vip">VIP Users & Codes</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
           </TabsList>
           <TabsContent value="apps"><AppsManager /></TabsContent>
