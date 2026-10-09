@@ -14,16 +14,204 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      apps: {
+        Row: {
+          apk_url: string | null
+          banner_url: string | null
+          build_number: number
+          category_id: string | null
+          changelog: string
+          created_at: string
+          description: string
+          file_size: string | null
+          icon_url: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          package_name: string
+          screenshots: string[]
+          tier: string
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          apk_url?: string | null
+          banner_url?: string | null
+          build_number?: number
+          category_id?: string | null
+          changelog?: string
+          created_at?: string
+          description?: string
+          file_size?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          package_name?: string
+          screenshots?: string[]
+          tier?: string
+          title: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          apk_url?: string | null
+          banner_url?: string | null
+          build_number?: number
+          category_id?: string | null
+          changelog?: string
+          created_at?: string
+          description?: string
+          file_size?: string | null
+          icon_url?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          package_name?: string
+          screenshots?: string[]
+          tier?: string
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "apps_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      m3u_settings: {
+        Row: {
+          allowed_hosts: string[]
+          enabled: boolean
+          id: number
+          min_connections: number
+          reject_expired: boolean
+          require_active_status: boolean
+          timeout_ms: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_hosts?: string[]
+          enabled?: boolean
+          id?: number
+          min_connections?: number
+          reject_expired?: boolean
+          require_active_status?: boolean
+          timeout_ms?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_hosts?: string[]
+          enabled?: boolean
+          id?: number
+          min_connections?: number
+          reject_expired?: boolean
+          require_active_status?: boolean
+          timeout_ms?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_codes: {
+        Row: {
+          code: string
+          created_at: string
+          device_limit: number
+          devices: string[]
+          expires_at: string | null
+          id: string
+          note: string
+          revoked: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          device_limit?: number
+          devices?: string[]
+          expires_at?: string | null
+          id?: string
+          note?: string
+          revoked?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          device_limit?: number
+          devices?: string[]
+          expires_at?: string | null
+          id?: string
+          note?: string
+          revoked?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      redeem_vip_code: {
+        Args: { _code: string; _device: string }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +338,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
