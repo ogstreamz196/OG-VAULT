@@ -64,7 +64,7 @@ export const saveR2Settings = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertBoss(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {
+    const patch: { enabled: boolean; account_id: string | null; access_key_id: string | null; bucket: string | null; public_base_url: string | null; updated_at: string; secret_access_key?: string } = {
       enabled: data.enabled,
       account_id: data.accountId || null,
       access_key_id: data.accessKeyId || null,
