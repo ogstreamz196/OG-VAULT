@@ -8,6 +8,7 @@ import { CategoriesManager } from "@/components/admin/CategoriesManager";
 import { VipManager } from "@/components/admin/VipManager";
 import { MembersManager } from "@/components/admin/MembersManager";
 import { OgVaultPassSyncCard } from "@/components/admin/OgVaultPassSyncCard";
+import { R2StorageCard } from "@/components/admin/R2StorageCard";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -55,7 +56,7 @@ function AdminPage() {
             <TabsTrigger value="vip">VIP Users & Codes</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
           </TabsList>
-          <TabsContent value="apps"><AppsManager /></TabsContent>
+          <TabsContent value="apps" className="space-y-6"><R2StorageCard /><AppsManager /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
           <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /><VipManager /></TabsContent>
           <TabsContent value="members"><MembersManager /></TabsContent>

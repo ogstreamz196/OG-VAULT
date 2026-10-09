@@ -21,3 +21,4 @@
 - Capacitor native install uses Filesystem.downloadFile + FileOpener with the APK MIME type (`src/lib/native-install.ts`); web falls back to a browser download.
 
 - OG Vault logins are pulled server-side from OG BOT Vault with an admin-saved API key in `vault_sync_settings` (service-role only; browser sees a masked key), every 15 min via cron route + "Sync now"; sign-in requires an active synced row (optional live verify) and derives the auth password from VAULT_AUTH_SECRET — failures never block the app.
+- Uploads go to Cloudflare R2 (settings in `storage_settings`, service-role only) when enabled; browser PUTs to a server-presigned URL so large APKs skip the worker. Falls back to built-in storage.
