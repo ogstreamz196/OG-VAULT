@@ -26,7 +26,7 @@ export function AppsManager() {
   async function remove(a: AppRow) {
     if (!confirm(`Delete ${a.title}?`)) return;
     const { error } = await supabase.from("apps").delete().eq("id", a.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("App deleted");
     refresh();
   }
@@ -67,7 +67,7 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
     try {
       const urls = await Promise.all(Array.from(files).map((f) => uploadMedia(bucket, f)));
       apply(urls);
-      if (bucket === "apks") set("file_size", `${Math.round(files[0].size / 1e6)} MB`);
+      if (bucket === "apks" && files[0]) set("file_size", `${Math.round(files[0].size / 1e6)} MB`);
       toast.success("Uploaded");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -77,12 +77,12 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
   }
 
   async function save() {
-    if (!d.title.trim()) return toast.error("Title is required");
+    if (!d.title.trim()) { toast.error("Title is required"); return; }
     setBusy("Saving…");
     const payload = { ...d, updated_at: new Date().toISOString() };
     const { error } = d.id ? await supabase.from("apps").update(payload).eq("id", d.id) : await supabase.from("apps").insert(payload);
     setBusy(null);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Saved");
     onSaved();
   }

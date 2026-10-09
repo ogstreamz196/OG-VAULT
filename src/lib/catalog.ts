@@ -31,7 +31,7 @@ export const appQuery = (id: string) =>
 /** Long-lived signed URL for private storage files (10 years). */
 export async function uploadMedia(bucket: "app-media" | "apks", file: File): Promise<string> {
   const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-z0-9._-]/gi, "_")}`;
-  const up = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || undefined });
+  const up = await supabase.storage.from(bucket).upload(path, file, file.type ? { contentType: file.type } : {});
   if (up.error) throw up.error;
   const signed = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
   if (signed.error) throw signed.error;

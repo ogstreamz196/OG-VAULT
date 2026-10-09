@@ -73,7 +73,7 @@ export function installSpatialNav(onBack: () => void): () => void {
     const idx = pickNext(toRect(active), others.map(toRect), dir);
     if (idx >= 0) {
       e.preventDefault();
-      const next = others[idx];
+      const next = others[idx]!;
       next.focus({ preventScroll: true });
       next.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
     }

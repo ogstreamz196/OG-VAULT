@@ -21,7 +21,7 @@ export function VipManager() {
     const expires_at = days > 0 ? new Date(Date.now() + days * 864e5).toISOString() : null;
     const rows = Array.from({ length: n }, () => ({ code: generateVipCode(), device_limit: Math.max(limit, 1), expires_at, note }));
     const { error } = await supabase.from("vip_codes").insert(rows);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`${n} code${n > 1 ? "s" : ""} created`);
     refresh();
   }

@@ -17,7 +17,7 @@ export function CategoriesManager() {
   async function add() {
     if (!name.trim()) return;
     const { error } = await supabase.from("categories").insert({ name: name.trim(), slug: slugify(name) || crypto.randomUUID().slice(0, 8), sort_order: (data.at(-1)?.sort_order ?? 0) + 1 });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setName("");
     refresh();
   }
