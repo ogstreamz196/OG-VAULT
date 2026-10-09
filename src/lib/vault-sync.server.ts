@@ -1,6 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-export const OG_BOT_BASE = "https://07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovableproject.com/api/public/v1/vault";
+export const OG_BOT_BASE = "https://project--07659a42-5b68-4c8b-83b5-ee9a625dbb92.lovable.app/api/public/v1/vault";
 const TIMEOUT_MS = 6000;
 
 export function maskKey(key: string | null | undefined) {
