@@ -20,4 +20,4 @@
 - Admin = `user_roles` admin row, auto-granted by signup trigger only to the boss email hard-coded in `handle_first_admin`; auth state lives in `AuthProvider` (`src/hooks/use-auth.tsx`).
 - Capacitor native install uses Filesystem.downloadFile + FileOpener with the APK MIME type (`src/lib/native-install.ts`); web falls back to a browser download.
 
-- OG Vault logins come from the main app webhook; store sign-in checks vault_credentials server-side and derives the auth password from OG_VAULT_WEBHOOK_SECRET — so short PINs work and only active synced logins get in.
+- OG Vault logins are pulled server-side from OG BOT Vault with an admin-saved API key in `vault_sync_settings` (service-role only; browser sees a masked key), every 15 min via cron route + "Sync now"; sign-in requires an active synced row (optional live verify) and derives the auth password from VAULT_AUTH_SECRET — failures never block the app.
