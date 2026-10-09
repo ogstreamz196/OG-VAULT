@@ -70,7 +70,7 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
 
   async function generate() {
     if (!d.title.trim()) { toast.error("Add a title first"); return; }
-    setBusy("Grok is writing…");
+    setBusy("Groq is writing…");
     try {
       const r = await gen({ data: { title: d.title, category: categories.find((c) => c.id === d.category_id)?.name ?? "", features, changelog: d.changelog ?? "" } });
       if ("error" in r && r.error) { toast.error(r.error); return; }
@@ -140,7 +140,7 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
           <div className="flex items-center gap-3"><Switch checked={d.is_featured ?? false} onCheckedChange={(v) => set("is_featured", v)} /><Label>Featured in hero</Label></div>
         </div>
         <div className="space-y-2 rounded-xl border border-glow/40 p-4">
-          <h3 className="font-semibold">✨ AI writer (Grok)</h3>
+          <h3 className="font-semibold">✨ AI writer (Groq)</h3>
           <F label="Key features (one per line)"><Textarea rows={3} value={features} placeholder={"4K playback\nNo buffering\nRemote friendly"} onChange={(e) => setFeatures(e.target.value)} /></F>
           <p className="text-xs text-muted-foreground">Uses the title, category and changelog below. Results replace the Description and Changelog — review before saving.</p>
           <Button type="button" variant="secondary" disabled={!!busy} onClick={generate}>Generate description & release notes</Button>

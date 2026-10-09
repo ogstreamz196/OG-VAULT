@@ -22,5 +22,5 @@
 
 - OG Vault logins are pulled server-side from OG BOT Vault with an admin-saved API key in `vault_sync_settings` (service-role only; browser sees a masked key), every 15 min via cron route + "Sync now"; sign-in requires an active synced row (optional live verify) and derives the auth password from VAULT_AUTH_SECRET — failures never block the app.
 - Uploads go to Cloudflare R2 (settings in `storage_settings`, service-role only) when enabled; browser PUTs to a server-presigned URL so large APKs skip the worker. Falls back to built-in storage.
-- AI store-copy generation calls xAI Grok directly with the boss's XAI_API_KEY (`src/lib/ai-copy.functions.ts`, admin-checked) — user chose not to spend Lovable credits.
+- AI store-copy generation calls Groq directly with the boss's GROQ_API_KEY (`src/lib/ai-copy.functions.ts`, admin-checked) — user chose not to spend Lovable credits.
 - Install/update state is a device-local ledger (`src/lib/installed.ts`) compared by build_number — no server tracking needed.
