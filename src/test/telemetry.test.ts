@@ -7,7 +7,7 @@ const ev = (event_type: string) => ({ app_id: "a", event_type, created_at: "2026
 
 describe("install analytics", () => {
   it("failure rate is failures divided by download attempts", () => {
-    const [s] = aggregate([ev("download_started"), ev("download_started"), ev("download_started"), ev("download_started"), ev("download_failed"), ev("install_prompted")]);
+    const s = aggregate([ev("download_started"), ev("download_started"), ev("download_started"), ev("download_started"), ev("download_failed"), ev("install_prompted")])[0]!;
     expect(s.downloads).toBe(4);
     expect(s.failures).toBe(1);
     expect(s.installs).toBe(1);
