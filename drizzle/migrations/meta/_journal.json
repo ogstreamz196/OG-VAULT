@@ -36,6 +36,13 @@
       "when": 1791567484511,
       "tag": "0004_vault_pass_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791587271181,
+      "tag": "0005_r2_storage_settings",
+      "breakpoints": true
     }
   ]
 }

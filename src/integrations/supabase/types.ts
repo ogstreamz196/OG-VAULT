@@ -166,6 +166,39 @@ export type Database = {
         }
         Relationships: []
       }
+      storage_settings: {
+        Row: {
+          access_key_id: string | null
+          account_id: string | null
+          bucket: string | null
+          enabled: boolean
+          id: number
+          public_base_url: string | null
+          secret_access_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_key_id?: string | null
+          account_id?: string | null
+          bucket?: string | null
+          enabled?: boolean
+          id?: number
+          public_base_url?: string | null
+          secret_access_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_key_id?: string | null
+          account_id?: string | null
+          bucket?: string | null
+          enabled?: boolean
+          id?: number
+          public_base_url?: string | null
+          secret_access_key?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
