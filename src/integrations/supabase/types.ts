@@ -191,6 +191,7 @@ export type Database = {
           id: string
           note: string
           password: string
+          synced_at: string
           updated_at: string
           username: string
         }
@@ -200,6 +201,7 @@ export type Database = {
           id?: string
           note?: string
           password?: string
+          synced_at?: string
           updated_at?: string
           username: string
         }
@@ -209,6 +211,7 @@ export type Database = {
           id?: string
           note?: string
           password?: string
+          synced_at?: string
           updated_at?: string
           username?: string
         }
@@ -229,6 +232,45 @@ export type Database = {
           id?: number
           last_event_at?: string | null
           last_ping_at?: string | null
+        }
+        Relationships: []
+      }
+      vault_sync_settings: {
+        Row: {
+          active_count: number | null
+          api_key: string | null
+          enabled: boolean
+          id: number
+          key_name: string | null
+          last_error: string | null
+          last_error_at: string | null
+          last_synced_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          active_count?: number | null
+          api_key?: string | null
+          enabled?: boolean
+          id?: number
+          key_name?: string | null
+          last_error?: string | null
+          last_error_at?: string | null
+          last_synced_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          active_count?: number | null
+          api_key?: string | null
+          enabled?: boolean
+          id?: number
+          key_name?: string | null
+          last_error?: string | null
+          last_error_at?: string | null
+          last_synced_at?: string | null
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }
