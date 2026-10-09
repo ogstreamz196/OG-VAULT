@@ -68,7 +68,7 @@ export function SignIn() {
           {mode === "in" ? "New here? Create an account" : "Have an account? Sign in"}
         </button>
         <button data-nav type="button" onClick={google} className="tv-focus w-full rounded-xl py-2 text-sm text-muted-foreground">
-          Staff sign in with Google
+          D.EV MODE
         </button>
       </form>
     </div>

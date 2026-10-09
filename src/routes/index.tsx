@@ -1,3 +1,4 @@
+import { tierFromAudiences } from "@/lib/access";
 import { Lock } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -57,7 +58,7 @@ function Home() {
           )}
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="relative flex h-full max-w-2xl flex-col justify-center gap-4 p-6 sm:p-12">
-            <div className="flex items-center gap-3"><span className="text-sm uppercase tracking-[0.3em] text-glow">Featured</span><TierBadge tier={hero.tier} /></div>
+            <div className="flex items-center gap-3"><span className="text-sm uppercase tracking-[0.3em] text-glow">Featured</span><TierBadge tier={tierFromAudiences(hero.audiences)} /></div>
             <h1 className="text-4xl sm:text-4xl sm:text-6xl font-extrabold leading-tight">{hero.title}</h1>
             <p className="line-clamp-3 text-xl text-muted-foreground">{hero.description}</p>
             <div className="flex gap-4 pt-2">

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Logo } from "./TvShell";
 
 export function StoreHeader() {
-  const { username, isVip, isAdmin, signOut } = useAuth();
+  const { username, isVip, isAdmin, level, signOut } = useAuth();
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 px-4 sm:px-14 pt-8">
       <Link to="/" data-nav className="tv-focus rounded-lg"><Logo /></Link>
@@ -14,7 +14,7 @@ export function StoreHeader() {
           <Link data-nav to="/admin" className="tv-focus rounded-xl border border-glow/60 px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-bold text-glow">Boss Control Panel</Link>
         )}
         <span className={`rounded-full px-4 py-1.5 text-sm font-bold ${isVip ? "bg-vip text-primary-foreground" : "border border-glow/50 text-glow"}`}>
-          {isAdmin ? "BOSS" : isVip ? "VIP" : "MEMBER"}{username ? ` · ${username}` : ""}
+          {isAdmin ? "BOSS" : isVip ? "VIP" : level === "guest" ? "GUEST" : "FREE"}{username ? ` · ${username}` : ""}
         </span>
         <button data-nav onClick={() => signOut()} className="tv-focus rounded-xl bg-secondary px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-semibold">Sign out</button>
       </nav>

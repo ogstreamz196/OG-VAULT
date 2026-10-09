@@ -1,3 +1,4 @@
+import { tierFromAudiences } from "@/lib/access";
 import { Link } from "@tanstack/react-router";
 import type { AppRow } from "@/lib/catalog";
 import { AppIcon, TierBadge } from "./TvShell";
@@ -8,7 +9,7 @@ export function AppTile({ app }: { app: AppRow }) {
       <AppIcon title={app.title} url={app.icon_url} className="aspect-square w-full rounded-xl text-4xl" />
       <div className="mt-3 flex items-center justify-between gap-2">
         <span className="truncate text-lg font-semibold">{app.title}</span>
-        <TierBadge tier={app.tier} />
+        <TierBadge tier={tierFromAudiences(app.audiences)} />
       </div>
       <span className="text-sm text-muted-foreground">v{app.version}</span>
     </Link>

@@ -2,7 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { appQuery } from "@/lib/catalog";
-import { canInstall } from "@/lib/access";
+import { canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
@@ -26,7 +26,7 @@ function AppDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
   const { data: app, isLoading } = useQuery(appQuery(id));
-  const { user, isVip, ready } = useAuth();
+  const { user, level, ready } = useAuth();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
@@ -60,7 +60,7 @@ function AppDetail() {
       </TvShell>
     );
 
-  const allowed = canInstall(!!user, isVip, app.tier);
+  const allowed = canSeeApp(level, app.audiences);
   const cat = (app as { categories?: { name: string } | null }).categories?.name;
 
   return (
@@ -75,7 +75,7 @@ function AppDetail() {
             <AppIcon title={app.title} url={app.icon_url} className="h-28 w-28 sm:h-48 sm:w-48 shrink-0 rounded-3xl text-6xl shadow-2xl" />
             <div className="flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
-                <TierBadge tier={app.tier} />
+                <TierBadge tier={tierFromAudiences(app.audiences)} />
                 {cat && <span className="text-sm uppercase tracking-widest text-muted-foreground">{cat}</span>}
               </div>
               <h1 className="text-4xl sm:text-6xl font-extrabold">{app.title}</h1>

@@ -17,10 +17,20 @@ export function usernameToEmail(raw: string): string {
   return `${normalizeUsername(raw)}@${USERNAME_DOMAIN}`;
 }
 
-/** VIP members (and the boss) can install everything; members can install free apps. */
-export function canInstall(signedIn: boolean, isVip: boolean, tier: string): boolean {
-  if (!signedIn) return false;
-  return tier === "vip" ? isVip : true;
+export type Level = "none" | "guest" | "free" | "vip" | "admin";
+export const AUDIENCES = ["guest", "free", "vip"] as const;
+export type Audience = (typeof AUDIENCES)[number];
+
+/** Guest = D.EV MODE Google sign-in, Free = username account, VIP = VIP member. The boss sees and installs everything. */
+export function canSeeApp(level: Level, audiences: string[]): boolean {
+  if (level === "admin") return true;
+  if (level === "none") return false;
+  return audiences.includes(level);
+}
+
+/** Badge shown on an app: VIP when only VIP users can see it. */
+export function tierFromAudiences(audiences: string[]): "vip" | "free" {
+  return audiences.length > 0 && audiences.every((a) => a === "vip") ? "vip" : "free";
 }
 
 /** A VIP category is locked for anyone without VIP; other categories are always open. */
