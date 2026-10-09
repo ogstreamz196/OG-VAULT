@@ -10,6 +10,7 @@ export async function downloadAndInstallApk(
   url: string,
   fileName: string,
   onProgress: (pct: number) => void,
+  onStage?: (stage: "downloaded") => void,
 ): Promise<"installed" | "downloaded"> {
   const safeName = fileName.replace(/[^a-z0-9._-]/gi, "_") + (fileName.endsWith(".apk") ? "" : ".apk");
 
@@ -57,6 +58,7 @@ export async function downloadAndInstallApk(
       progress: true,
     });
     onProgress(100);
+    onStage?.("downloaded");
     const path = result.path ?? (await Filesystem.getUri({ path: safeName, directory: Directory.Cache })).uri;
     // Opening an APK with this MIME type launches the Android Package Installer.
     await FileOpener.open({ filePath: path, contentType: "application/vnd.android.package-archive" });

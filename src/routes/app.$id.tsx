@@ -7,6 +7,7 @@ import { canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
+import { logInstallEvent } from "@/lib/telemetry";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 
 export const Route = createFileRoute("/app/$id")({
@@ -40,13 +41,22 @@ function AppDetail() {
     if (!app?.apk_url) return setStatus("No APK file is available for this app yet.");
     setStatus(null);
     setProgress(0);
+    let downloaded = false;
+    logInstallEvent(app.id, user?.id, "download_started");
     try {
-      const r = await downloadAndInstallApk(app.apk_url, `${app.package_name || app.title}-${app.version}`, setProgress);
+      const r = await downloadAndInstallApk(app.apk_url, `${app.package_name || app.title}-${app.version}`, setProgress, () => {
+        downloaded = true;
+        logInstallEvent(app.id, user?.id, "download_completed");
+      });
+      if (r === "installed") logInstallEvent(app.id, user?.id, "install_prompted");
+      else if (!downloaded) logInstallEvent(app.id, user?.id, "download_completed");
       recordInstall(app);
       setInst("installed");
       setStatus(r === "installed" ? "Installer opened — confirm on screen." : "Download complete.");
     } catch (e) {
-      setStatus(e instanceof Error ? e.message : "Download failed");
+      const msg = e instanceof Error ? e.message : "Download failed";
+      logInstallEvent(app.id, user?.id, downloaded ? "install_failed" : "download_failed", msg);
+      setStatus(msg);
     } finally {
       setTimeout(() => setProgress(null), 800);
     }
