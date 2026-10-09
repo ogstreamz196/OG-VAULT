@@ -4,3 +4,6 @@
 - [x] Admin portal (apps, media, APKs, categories, VIP codes, M3U)
 - [x] Capacitor config + native install helper
 - [x] Full audit (build, routes, admin flow)
+- [x] Boss admin = ogstreamz196@gmail.com via Google; "Boss Control Panel" in store menu
+- [x] Replace store login with username + password accounts
+- [x] Show all categories incl. OG VIP ACCESS (locked for non-VIP, open for VIP) + category pages

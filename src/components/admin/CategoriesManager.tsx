@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { CategoryRow } from "@/lib/catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -25,6 +26,10 @@ export function CategoriesManager() {
     if (!n.trim() || n === c.name) return;
     const { error } = await supabase.from("categories").update({ name: n.trim() }).eq("id", c.id);
     if (error) toast.error(error.message); else { toast.success("Renamed"); refresh(); }
+  }
+  async function toggleVip(c: CategoryRow, is_vip: boolean) {
+    const { error } = await supabase.from("categories").update({ is_vip }).eq("id", c.id);
+    if (error) toast.error(error.message); else refresh();
   }
   async function move(i: number, dir: -1 | 1) {
     const a = data[i], b = data[i + dir];
@@ -50,6 +55,7 @@ export function CategoriesManager() {
           <div key={c.id} className="glass flex items-center gap-2 rounded-xl p-2">
             <span className="w-8 text-center text-muted-foreground">{i + 1}</span>
             <Input defaultValue={c.name} onBlur={(e) => rename(c, e.target.value)} />
+            <label className="flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
             <Button variant="secondary" size="sm" disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
             <Button variant="secondary" size="sm" disabled={i === data.length - 1} onClick={() => move(i, 1)}>↓</Button>
             <Button variant="destructive" size="sm" onClick={() => remove(c)}>Remove</Button>

@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { appQuery } from "@/lib/catalog";
-import { canInstall, getSession, type VaultSession } from "@/lib/vault-session";
+import { canInstall } from "@/lib/access";
+import { useAuth } from "@/hooks/use-auth";
+import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 
@@ -24,11 +26,10 @@ function AppDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
   const { data: app, isLoading } = useQuery(appQuery(id));
-  const [session, setSess] = useState<VaultSession | null>(null);
+  const { user, isVip, ready } = useAuth();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
-  useEffect(() => setSess(getSession()), []);
 
   const back = () => (shot ? setShot(null) : router.navigate({ to: "/" }));
 
@@ -46,6 +47,8 @@ function AppDetail() {
     }
   }
 
+  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!user) return <TvShell key="signin" onBack={() => {}}><SignIn /></TvShell>;
   if (isLoading) return <TvShell><p className="p-14 text-2xl text-muted-foreground">Loading…</p></TvShell>;
   if (!app)
     return (
@@ -57,7 +60,7 @@ function AppDetail() {
       </TvShell>
     );
 
-  const allowed = canInstall(session, app.tier);
+  const allowed = canInstall(!!user, isVip, app.tier);
   const cat = (app as { categories?: { name: string } | null }).categories?.name;
 
   return (
@@ -87,8 +90,8 @@ function AppDetail() {
                   </button>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <span className="rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg">{session ? "VIP access required to install this app" : "Sign in on the home screen to install"}</span>
-                    <Link data-nav data-nav-autofocus to="/" className="tv-focus rounded-xl bg-secondary px-6 py-4 font-semibold">Back to store</Link>
+                    <span className="rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg">VIP access required to install this app</span>
+                    <Link data-nav data-nav-autofocus to="/category/$slug" params={{ slug: "og-vip-access" }} className="tv-focus rounded-xl bg-vip px-6 py-4 font-bold text-primary-foreground">Unlock VIP</Link>
                   </div>
                 )}
               </div>

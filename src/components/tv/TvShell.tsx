@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { focusFirst, installSpatialNav } from "@/lib/spatial-nav";
 
-export function TvShell({ children, onBack }: { children: ReactNode; onBack?: () => void }) {
+export function TvShell({ children, onBack }: { children: ReactNode; onBack?: (() => void) | undefined }) {
   const router = useRouter();
   useEffect(() => {
     const off = installSpatialNav(() => {

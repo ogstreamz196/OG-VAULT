@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { generateVipCode } from "@/lib/vault-session";
+import { generateVipCode } from "@/lib/access";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ export function VipManager() {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="text-left text-muted-foreground"><tr><th className="p-2">Code</th><th>Status</th><th>Devices</th><th>Expires</th><th>Note</th><th /></tr></thead>
+          <thead className="text-left text-muted-foreground"><tr><th className="p-2">Code</th><th>Status</th><th>Accounts</th><th>Expires</th><th>Note</th><th /></tr></thead>
           <tbody>
             {data.map((c) => (
               <tr key={c.id} className="border-t">
@@ -59,7 +59,7 @@ export function VipManager() {
                 <td>{c.expires_at ? new Date(c.expires_at).toLocaleDateString() : "Never"}</td>
                 <td className="max-w-40 truncate">{c.note}</td>
                 <td className="space-x-1 whitespace-nowrap py-2 text-right">
-                  <Button size="sm" variant="secondary" onClick={() => patch(c.id, { devices: [] })}>Reset devices</Button>
+                  <Button size="sm" variant="secondary" onClick={() => patch(c.id, { devices: [] })}>Reset accounts</Button>
                   <Button size="sm" variant="secondary" onClick={() => patch(c.id, { expires_at: new Date().toISOString() })}>Expire</Button>
                   <Button size="sm" variant="secondary" onClick={() => patch(c.id, { revoked: !c.revoked })}>{c.revoked ? "Restore" : "Revoke"}</Button>
                   <Button size="sm" variant="destructive" onClick={() => remove(c.id)}>Delete</Button>
