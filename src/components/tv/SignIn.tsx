@@ -44,7 +44,7 @@ export function SignIn() {
       {/* portal backdrop */}
       <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 28%, color-mix(in oklab, var(--glow) 28%, transparent), transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in oklab, var(--vip) 22%, transparent), transparent 50%)" }} />
 
-      <div className="relative mt-2 flex w-full max-w-[min(78vw,26rem)] items-center justify-center sm:max-w-[28rem] lg:max-w-[30rem]">
+      <div className="relative mt-2 flex w-full max-w-[min(78vw,26rem,48vh)] items-center justify-center">
         <div className="animate-portal-spin absolute -inset-6 rounded-full opacity-70 blur-2xl sm:-inset-10"
           style={{ background: "conic-gradient(from 0deg, var(--glow), transparent 25%, var(--primary) 50%, transparent 75%, var(--glow))" }} />
         <div className="animate-portal-pulse absolute -inset-2 rounded-[2rem] border-2 border-glow/60 sm:-inset-3"
