@@ -41,14 +41,14 @@ function CategoryBody() {
   return (
     <div className="pb-20">
       <StoreHeader />
-      <div className="px-14 pt-10">
+      <div className="px-4 sm:px-14 pt-10">
         {isLoading && <p className="text-2xl text-muted-foreground">Loading…</p>}
         {data && !cat && (
           <div className="space-y-6"><p className="text-2xl">Category not found.</p><Link data-nav to="/" className="tv-focus inline-block rounded-xl bg-primary px-6 py-3 font-bold text-primary-foreground">Back to store</Link></div>
         )}
         {cat && (
           <>
-            <h1 className={`text-5xl font-extrabold ${cat.is_vip ? "text-vip" : ""}`}>{cat.name}</h1>
+            <h1 className={`text-3xl sm:text-5xl font-extrabold ${cat.is_vip ? "text-vip" : ""}`}>{cat.name}</h1>
             {isCategoryLocked(cat, isVip) ? (
               <div className="pt-10"><VipLock title={cat.name} /></div>
             ) : apps.length ? (

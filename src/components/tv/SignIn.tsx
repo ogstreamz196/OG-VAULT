@@ -2,10 +2,11 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { normalizeUsername, usernameError, usernameToEmail } from "@/lib/access";
-import { Logo } from "./TvShell";
+import vaultLogo from "@/assets/og-vault-logo.jpg.asset.json";
 
-const field = "tv-focus w-full rounded-xl border border-input bg-muted px-5 py-4 text-xl text-foreground placeholder:text-muted-foreground focus:border-glow";
-const btn = "tv-focus rounded-xl px-6 py-4 text-lg font-bold";
+const field =
+  "tv-focus w-full rounded-xl border border-input bg-muted/80 px-4 py-3.5 text-lg sm:px-5 sm:py-4 sm:text-xl text-foreground placeholder:text-muted-foreground focus:border-glow";
+const btn = "tv-focus rounded-xl px-6 py-3.5 sm:py-4 text-base sm:text-lg font-bold";
 
 export function SignIn() {
   const [mode, setMode] = useState<"in" | "up">("in");
@@ -39,16 +40,29 @@ export function SignIn() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-10">
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(circle at 30% 20%, color-mix(in oklab, var(--primary) 35%, transparent), transparent 55%), radial-gradient(circle at 80% 90%, color-mix(in oklab, var(--glow) 18%, transparent), transparent 50%)" }} />
-      <form onSubmit={submit} className="glass relative w-full max-w-xl space-y-6 rounded-3xl p-10">
-        <Logo />
-        <h1 className="text-3xl font-extrabold">{mode === "in" ? "Sign in" : "Create account"}</h1>
-        <input data-nav data-nav-autofocus className={field} placeholder="Username" autoComplete="username" autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} />
+    <div className="relative flex min-h-screen flex-col items-center overflow-hidden px-4 py-8 sm:py-10">
+      {/* portal backdrop */}
+      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 28%, color-mix(in oklab, var(--glow) 28%, transparent), transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in oklab, var(--vip) 22%, transparent), transparent 50%)" }} />
+
+      <div className="relative mt-2 flex w-full max-w-[min(78vw,26rem,48vh)] items-center justify-center">
+        <div className="animate-portal-spin absolute -inset-6 rounded-full opacity-70 blur-2xl sm:-inset-10"
+          style={{ background: "conic-gradient(from 0deg, var(--glow), transparent 25%, var(--primary) 50%, transparent 75%, var(--glow))" }} />
+        <div className="animate-portal-pulse absolute -inset-2 rounded-[2rem] border-2 border-glow/60 sm:-inset-3"
+          style={{ boxShadow: "0 0 60px 6px color-mix(in oklab, var(--glow) 45%, transparent), inset 0 0 40px color-mix(in oklab, var(--glow) 35%, transparent)" }} />
+        <img src={vaultLogo.url} alt="ØG-VAULT — All your apps in one place"
+          className="animate-portal-in relative aspect-square w-full rounded-[1.75rem] object-cover object-top shadow-2xl" />
+      </div>
+
+      <form onSubmit={submit} className="glass animate-rise-in relative mt-8 w-full max-w-md space-y-4 rounded-3xl p-5 sm:mt-10 sm:max-w-xl sm:space-y-5 sm:p-8">
+        <div className="text-center">
+          <p className="text-xs uppercase tracking-[0.35em] text-glow">Vault access</p>
+          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{mode === "in" ? "Enter the vault" : "Create your key"}</h1>
+        </div>
+        <input data-nav data-nav-autofocus className={field} placeholder="Username" autoComplete="username" autoCapitalize="none" autoCorrect="off" value={username} onChange={(e) => setUsername(e.target.value)} />
         <input data-nav className={field} type="password" placeholder="Password" autoComplete={mode === "in" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} />
-        {error && <p role="alert" className="rounded-xl border border-vip/60 bg-vip/15 px-4 py-3 text-lg">{error}</p>}
+        {error && <p role="alert" className="rounded-xl border border-vip/60 bg-vip/15 px-4 py-3 text-base sm:text-lg">{error}</p>}
         <button data-nav type="submit" disabled={busy} className={`${btn} w-full bg-primary text-primary-foreground disabled:opacity-60`}>
-          {busy ? "Please wait…" : mode === "in" ? "Sign in" : "Create account"}
+          {busy ? "Unlocking…" : mode === "in" ? "Sign in" : "Create account"}
         </button>
         <button data-nav type="button" onClick={() => { setMode(mode === "in" ? "up" : "in"); setError(null); }} className={`${btn} w-full bg-secondary text-secondary-foreground`}>
           {mode === "in" ? "New here? Create an account" : "Have an account? Sign in"}

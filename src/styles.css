@@ -110,3 +110,26 @@
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 }
+
+/* Vault portal entrance */
+@keyframes portal-in {
+  0% { opacity: 0; transform: scale(0.6) rotate(-6deg); filter: blur(18px) brightness(2); }
+  60% { opacity: 1; transform: scale(1.04) rotate(1deg); filter: blur(0) brightness(1.2); }
+  100% { opacity: 1; transform: scale(1) rotate(0); filter: none; }
+}
+@keyframes portal-spin { to { transform: rotate(360deg); } }
+@keyframes portal-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@utility animate-portal-in { animation: portal-in 1.4s cubic-bezier(.2,.8,.2,1) both; }
+@utility animate-portal-spin { animation: portal-spin 9s linear infinite; }
+@utility animate-portal-pulse { animation: portal-pulse 3.2s ease-in-out infinite; }
+@utility animate-rise-in { animation: rise-in 0.8s ease-out 1.1s both; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-portal-in, .animate-portal-spin, .animate-portal-pulse, .animate-rise-in { animation: none; }
+}

@@ -68,24 +68,24 @@ function AppDetail() {
       <div className="relative min-h-screen">
         {app.banner_url && <img src={app.banner_url} alt="" className="absolute inset-x-0 top-0 h-[460px] w-full object-cover opacity-30" />}
         <div className="absolute inset-x-0 top-0 h-[460px]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
-        <div className="relative px-14 pt-10 pb-20">
+        <div className="relative px-4 sm:px-14 pt-10 pb-20">
           <button data-nav onClick={back} className="tv-focus rounded-xl bg-secondary px-5 py-2.5 font-semibold">‹ Back</button>
 
-          <div className="mt-8 flex gap-10">
-            <AppIcon title={app.title} url={app.icon_url} className="h-48 w-48 shrink-0 rounded-3xl text-6xl shadow-2xl" />
+          <div className="mt-8 flex flex-col gap-6 sm:flex-row sm:gap-10">
+            <AppIcon title={app.title} url={app.icon_url} className="h-28 w-28 sm:h-48 sm:w-48 shrink-0 rounded-3xl text-6xl shadow-2xl" />
             <div className="flex-1 space-y-4">
               <div className="flex flex-wrap items-center gap-3">
                 <TierBadge tier={app.tier} />
                 {cat && <span className="text-sm uppercase tracking-widest text-muted-foreground">{cat}</span>}
               </div>
-              <h1 className="text-6xl font-extrabold">{app.title}</h1>
+              <h1 className="text-4xl sm:text-6xl font-extrabold">{app.title}</h1>
               <p className="text-lg text-muted-foreground">
                 Version {app.version} · Build {app.build_number}{app.file_size ? ` · ${app.file_size}` : ""}{app.package_name ? ` · ${app.package_name}` : ""}
               </p>
 
               <div className="flex items-center gap-4 pt-2">
                 {allowed ? (
-                  <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null} className="tv-focus rounded-xl bg-primary px-10 py-4 text-xl font-bold text-primary-foreground disabled:opacity-70">
+                  <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
                     {progress !== null ? `Downloading ${progress}%` : isNative() ? "Download & Install" : "Download APK"}
                   </button>
                 ) : (
