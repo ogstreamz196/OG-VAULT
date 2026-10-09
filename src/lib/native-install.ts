@@ -45,6 +45,11 @@ export async function downloadAndInstallApk(
     if (p.contentLength) onProgress(Math.round((p.bytes / p.contentLength) * 100));
   });
   try {
+    // Storage cleanup: clear APKs left from earlier installs before downloading a new one.
+    try {
+      const { files } = await Filesystem.readdir({ path: "", directory: Directory.Cache });
+      await Promise.all(files.filter((f) => f.name.endsWith(".apk")).map((f) => Filesystem.deleteFile({ path: f.name, directory: Directory.Cache }).catch(() => {})));
+    } catch { /* cache may be empty */ }
     const result = await Filesystem.downloadFile({
       url,
       path: safeName,
