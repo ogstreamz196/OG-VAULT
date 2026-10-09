@@ -10,10 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AppIcon, TierBadge } from "@/components/tv/TvShell";
+import { AppIcon } from "@/components/tv/TvShell";
+import { AUDIENCES, tierFromAudiences } from "@/lib/access";
+
+const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: "VIP" } as const;
 
 type Draft = TablesInsert<"apps">;
-const empty: Draft = { title: "", package_name: "", version: "1.0.0", build_number: 1, description: "", changelog: "", tier: "free", is_active: true, is_featured: false, category_id: null, icon_url: null, banner_url: null, screenshots: [], apk_url: null, file_size: null };
+const empty: Draft = { title: "", package_name: "", version: "1.0.0", build_number: 1, description: "", changelog: "", tier: "free", audiences: ["free", "vip"], is_active: true, is_featured: false, category_id: null, icon_url: null, banner_url: null, screenshots: [], apk_url: null, file_size: null };
 
 export function AppsManager() {
   const qc = useQueryClient();
@@ -42,7 +45,7 @@ export function AppsManager() {
           <div key={a.id} className="glass flex items-center gap-4 rounded-xl p-3">
             <AppIcon title={a.title} url={a.icon_url} className="h-14 w-14 rounded-lg text-lg" />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2"><span className="truncate font-semibold">{a.title}</span><TierBadge tier={a.tier} />{!a.is_active && <span className="text-xs text-muted-foreground">(hidden)</span>}{a.is_featured && <span className="text-xs text-glow">★ featured</span>}</div>
+              <div className="flex items-center gap-2"><span className="truncate font-semibold">{a.title}</span>{a.audiences.map((x) => <span key={x} className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${x === "vip" ? "bg-vip text-primary-foreground" : x === "guest" ? "border border-muted-foreground text-muted-foreground" : "border border-glow/60 text-glow"}`}>{x}</span>)}{!a.is_active && <span className="text-xs text-muted-foreground">(hidden)</span>}{a.is_featured && <span className="text-xs text-glow">★ featured</span>}</div>
               <div className="truncate text-sm text-muted-foreground">{a.package_name} · v{a.version} ({a.build_number}) · {cats.data?.find((c) => c.id === a.category_id)?.name ?? "No category"} · {a.apk_url ? "APK ready" : "No APK"}</div>
             </div>
             <Button variant="secondary" onClick={() => setEditing({ ...a })}>Edit</Button>
@@ -78,8 +81,9 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
 
   async function save() {
     if (!d.title.trim()) { toast.error("Title is required"); return; }
+    if (!(d.audiences ?? []).length) { toast.error("Pick at least one group: Guest, Free or VIP"); return; }
     setBusy("Saving…");
-    const payload = { ...d, updated_at: new Date().toISOString() };
+    const payload = { ...d, tier: tierFromAudiences(d.audiences ?? []), updated_at: new Date().toISOString() };
     const { error } = d.id ? await supabase.from("apps").update(payload).eq("id", d.id) : await supabase.from("apps").insert(payload);
     setBusy(null);
     if (error) { toast.error(error.message); return; }
@@ -103,10 +107,18 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </F>
-          <F label="Tier">
-            <select className="h-9 w-full rounded-md border border-input bg-muted px-3 text-sm" value={d.tier ?? "free"} onChange={(e) => set("tier", e.target.value)}>
-              <option value="free">Free</option><option value="vip">VIP</option>
-            </select>
+          <F label="Who can see this app">
+            <div className="flex flex-wrap gap-4 pt-1">
+              {AUDIENCES.map((a) => {
+                const on = (d.audiences ?? []).includes(a);
+                return (
+                  <label key={a} className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${on ? "border-glow text-glow" : "text-muted-foreground"}`}>
+                    <input type="checkbox" checked={on} onChange={() => set("audiences", on ? (d.audiences ?? []).filter((x) => x !== a) : [...(d.audiences ?? []), a])} />
+                    {AUDIENCE_LABEL[a]}
+                  </label>
+                );
+              })}
+            </div>
           </F>
           <div className="flex items-center gap-3"><Switch checked={d.is_active ?? true} onCheckedChange={(v) => set("is_active", v)} /><Label>Active (visible in store)</Label></div>
           <div className="flex items-center gap-3"><Switch checked={d.is_featured ?? false} onCheckedChange={(v) => set("is_featured", v)} /><Label>Featured in hero</Label></div>

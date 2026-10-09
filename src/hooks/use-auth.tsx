@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import type { Level } from "@/lib/access";
 
 type AuthState = {
   ready: boolean;
@@ -9,6 +10,7 @@ type AuthState = {
   username: string | null;
   isAdmin: boolean;
   isVip: boolean;
+  level: Level;
   refreshAccess: () => void;
   signOut: () => Promise<void>;
 };
@@ -26,21 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
       setUser(session?.user ?? null);
       setReady(true);
+      if (event === "SIGNED_IN") { qc.invalidateQueries({ queryKey: ["catalog"] }); qc.invalidateQueries({ queryKey: ["app"] }); }
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [qc]);
 
   const access = useQuery({
     queryKey: ["access", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const id = user!.id;
-      const [profile, admin, vip] = await Promise.all([
+      const [profile, lvl] = await Promise.all([
         supabase.from("profiles").select("username").eq("id", id).maybeSingle(),
-        supabase.rpc("has_role", { _user_id: id, _role: "admin" }),
-        supabase.rpc("is_vip", { _user_id: id }),
+        supabase.rpc("user_level", { _user_id: id }),
       ]);
-      return { username: profile.data?.username ?? null, isAdmin: !!admin.data, isVip: !!vip.data };
+      const level = ((lvl.data as string | null) ?? "guest") as Level;
+      return { username: profile.data?.username ?? null, level, isAdmin: level === "admin", isVip: level === "vip" || level === "admin" };
     },
   });
 
@@ -50,11 +53,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     username: access.data?.username ?? (user?.user_metadata?.["full_name"] as string | undefined) ?? null,
     isAdmin: access.data?.isAdmin ?? false,
     isVip: access.data?.isVip ?? false,
-    refreshAccess: () => qc.invalidateQueries({ queryKey: ["access"] }),
+    level: access.data?.level ?? (user ? "guest" : "none"),
+    refreshAccess: () => { qc.invalidateQueries({ queryKey: ["access"] }); qc.invalidateQueries({ queryKey: ["catalog"] }); qc.invalidateQueries({ queryKey: ["app"] }); },
     signOut: async () => {
       await qc.cancelQueries();
-      qc.removeQueries({ queryKey: ["access"] });
       await supabase.auth.signOut();
+      qc.clear();
     },
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
