@@ -1,10 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { catalogQuery, type AppRow } from "@/lib/catalog";
-import { clearSession, getSession, type VaultSession } from "@/lib/vault-session";
-import { AppIcon, Logo, TierBadge, TvShell } from "@/components/tv/TvShell";
-import { LoginGate } from "@/components/tv/LoginGate";
+import { catalogQuery, type AppRow, type CategoryRow } from "@/lib/catalog";
+import { isCategoryLocked } from "@/lib/access";
+import { useAuth } from "@/hooks/use-auth";
+import { TierBadge } from "@/components/tv/TvShell";
+import { StoreGate } from "@/components/tv/StoreGate";
+import { StoreHeader } from "@/components/tv/StoreHeader";
+import { AppTile } from "@/components/tv/AppTile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,30 +20,19 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: StoreHome,
+  component: () => (
+    <StoreGate onBack={() => {}}>
+      <Home />
+    </StoreGate>
+  ),
 });
 
-function StoreHome() {
-  const [session, setSess] = useState<VaultSession | null | undefined>(undefined);
-  useEffect(() => setSess(getSession()), []);
-
-  if (session === undefined) return <div className="min-h-screen bg-background" />;
-  if (!session)
-    return (
-      <TvShell key="gate" onBack={() => {}}>
-        <LoginGate onDone={setSess} />
-      </TvShell>
-    );
-  return (
-    <TvShell key="home" onBack={() => {}}>
-      <Home session={session} onLogout={() => { clearSession(); setSess(null); }} />
-    </TvShell>
-  );
-}
-
-function Home({ session, onLogout }: { session: VaultSession; onLogout: () => void }) {
+function Home() {
+  const { isVip } = useAuth();
   const { data, isLoading, error } = useQuery(catalogQuery);
-  const featured = useMemo(() => data?.apps.filter((a) => a.is_featured) ?? [], [data]);
+  const lockedCats = useMemo(() => new Set(data?.categories.filter((c) => isCategoryLocked(c, isVip)).map((c) => c.id)), [data, isVip]);
+  const visible = useMemo(() => data?.apps.filter((a) => !a.category_id || !lockedCats.has(a.category_id)) ?? [], [data, lockedCats]);
+  const featured = visible.filter((a) => a.is_featured);
   const [slide, setSlide] = useState(0);
   useEffect(() => {
     if (featured.length < 2) return;
@@ -51,21 +43,12 @@ function Home({ session, onLogout }: { session: VaultSession; onLogout: () => vo
 
   return (
     <div className="pb-20">
-      <header className="flex items-center justify-between px-14 pt-8">
-        <Logo />
-        <div className="flex items-center gap-4">
-          <span className={`rounded-full px-4 py-1.5 text-sm font-bold ${session.kind === "vip" ? "bg-vip text-primary-foreground" : "border border-glow/50 text-glow"}`}>
-            {session.kind === "vip" ? "VIP ACCESS" : "FREE TIER"}
-          </span>
-          <button data-nav onClick={onLogout} className="tv-focus rounded-xl bg-secondary px-5 py-2.5 font-semibold text-secondary-foreground">Sign out</button>
-        </div>
-      </header>
-
+      <StoreHeader />
       {isLoading && <p className="px-14 pt-20 text-2xl text-muted-foreground">Loading the vault…</p>}
       {error && <p className="px-14 pt-20 text-2xl text-vip">Couldn't load apps. Check your connection.</p>}
 
       {hero && (
-        <section className="relative mx-14 mt-8 h-[420px] overflow-hidden rounded-3xl glass">
+        <section className="glass relative mx-14 mt-8 h-[420px] overflow-hidden rounded-3xl">
           {hero.banner_url ? (
             <img src={hero.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
@@ -78,27 +61,18 @@ function Home({ session, onLogout }: { session: VaultSession; onLogout: () => vo
             <p className="line-clamp-3 text-xl text-muted-foreground">{hero.description}</p>
             <div className="flex gap-4 pt-2">
               <Link data-nav data-nav-autofocus to="/app/$id" params={{ id: hero.id }} className="tv-focus rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground">View & Install</Link>
-              {featured.length > 1 && (
-                <button data-nav onClick={() => setSlide((s) => (s + 1) % featured.length)} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Next ›</button>
-              )}
+              {featured.length > 1 && <button data-nav onClick={() => setSlide((s) => (s + 1) % featured.length)} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Next ›</button>}
             </div>
           </div>
-          {featured.length > 1 && (
-            <div className="absolute bottom-6 right-8 flex gap-2">
-              {featured.map((f, i) => <span key={f.id} className={`h-2 rounded-full transition-all ${i === slide % featured.length ? "w-8 bg-glow" : "w-2 bg-muted-foreground/50"}`} />)}
-            </div>
-          )}
         </section>
       )}
 
       {data && (
         <>
-          <Row title="Recently Added" apps={data.apps.slice(0, 10)} />
-          {data.categories.map((c) => {
-            const apps = data.apps.filter((a) => a.category_id === c.id);
-            return apps.length ? <Row key={c.id} title={c.name} apps={apps} /> : null;
-          })}
-          {data.apps.length === 0 && <p className="px-14 pt-16 text-2xl text-muted-foreground">No apps yet. Check back soon.</p>}
+          {visible.length > 0 && <Row title="Recently Added" apps={visible.slice(0, 10)} />}
+          {data.categories.map((c) => (
+            <CategoryRowView key={c.id} category={c} apps={data.apps.filter((a) => a.category_id === c.id)} locked={lockedCats.has(c.id)} />
+          ))}
         </>
       )}
     </div>
@@ -109,17 +83,32 @@ function Row({ title, apps }: { title: string; apps: AppRow[] }) {
   return (
     <section className="mt-12">
       <h2 className="px-14 text-2xl font-bold">{title}</h2>
+      <div className="no-scrollbar flex gap-6 overflow-x-auto px-14 py-6">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
+    </section>
+  );
+}
+
+function CategoryRowView({ category, apps, locked }: { category: CategoryRow; apps: AppRow[]; locked: boolean }) {
+  return (
+    <section className="mt-12">
+      <h2 className={`px-14 text-2xl font-bold ${category.is_vip ? "text-vip" : ""}`}>{category.name}{category.is_vip && !locked ? " · Unlocked" : ""}</h2>
       <div className="no-scrollbar flex gap-6 overflow-x-auto px-14 py-6">
-        {apps.map((a) => (
-          <Link key={a.id} data-nav to="/app/$id" params={{ id: a.id }} className="tv-focus glass group w-56 shrink-0 rounded-2xl p-4">
-            <AppIcon title={a.title} url={a.icon_url} className="aspect-square w-full rounded-xl text-4xl" />
-            <div className="mt-3 flex items-center justify-between gap-2">
-              <span className="truncate text-lg font-semibold">{a.title}</span>
-              <TierBadge tier={a.tier} />
-            </div>
-            <span className="text-sm text-muted-foreground">v{a.version}</span>
+        {locked ? (
+          <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex h-64 w-[34rem] shrink-0 items-center gap-6 rounded-2xl border-vip/60 p-8">
+            <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-vip/20 text-4xl">🔒</span>
+            <span className="text-left">
+              <span className="block text-2xl font-extrabold">VIP user area</span>
+              <span className="mt-1 block text-lg text-muted-foreground">{apps.length ? `${apps.length} VIP app${apps.length > 1 ? "s" : ""} inside. ` : ""}Press OK to enter your VIP code.</span>
+            </span>
           </Link>
-        ))}
+        ) : (
+          <>
+            {apps.map((a) => <AppTile key={a.id} app={a} />)}
+            <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex w-56 shrink-0 items-center justify-center rounded-2xl p-4 text-center text-lg font-semibold text-glow">
+              {apps.length ? `Open ${category.name} ›` : "Coming soon — open category"}
+            </Link>
+          </>
+        )}
       </div>
     </section>
   );
