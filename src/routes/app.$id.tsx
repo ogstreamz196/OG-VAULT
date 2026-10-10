@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { installState, recordInstall, type InstallState } from "@/lib/installed";
 import { appQuery } from "@/lib/catalog";
-import { canSeeApp, tierFromAudiences } from "@/lib/access";
+import { canDownloadApp as canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
