@@ -11,6 +11,8 @@ import { OgVaultPassSyncCard } from "@/components/admin/OgVaultPassSyncCard";
 import { R2StorageCard } from "@/components/admin/R2StorageCard";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { RemoteActionsManager } from "@/components/admin/RemoteActionsManager";
+import { BroadcastCard } from "@/components/admin/BroadcastCard";
+import { isNative } from "@/lib/native-install";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -68,7 +70,7 @@ function AdminPage() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="remote">Remote Tools</TabsTrigger>
           </TabsList>
-          <TabsContent value="apps" className="space-y-6"><R2StorageCard /><AppsManager /></TabsContent>
+          <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
           <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /><VipManager /></TabsContent>
           <TabsContent value="members"><MembersManager /></TabsContent>
