@@ -1,11 +1,9 @@
 import { tierFromAudiences } from "@/lib/access";
-import { Lock } from "lucide-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { catalogQuery, type AppRow, type CategoryRow } from "@/lib/catalog";
-import { isCategoryLocked } from "@/lib/access";
-import { useAuth } from "@/hooks/use-auth";
+import { appsForCategory } from "@/lib/access";
 import { TierBadge } from "@/components/tv/TvShell";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { StoreHeader } from "@/components/tv/StoreHeader";
@@ -30,10 +28,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { isVip } = useAuth();
   const { data, isLoading, error } = useQuery(catalogQuery);
-  const lockedCats = useMemo(() => new Set(data?.categories.filter((c) => isCategoryLocked(c, isVip)).map((c) => c.id)), [data, isVip]);
-  const visible = useMemo(() => data?.apps.filter((a) => !a.category_id || !lockedCats.has(a.category_id)) ?? [], [data, lockedCats]);
+  const visible = useMemo(() => data?.apps ?? [], [data]);
   const featured = visible.filter((a) => a.is_featured);
   const [slide, setSlide] = useState(0);
   useEffect(() => {
@@ -94,7 +90,7 @@ function Home() {
         <>
           {visible.length > 0 && <Row title="Recently Added" apps={visible.slice(0, 10)} />}
           {data.categories.map((c) => (
-            <CategoryRowView key={c.id} category={c} apps={data.apps.filter((a) => a.category_id === c.id)} locked={lockedCats.has(c.id)} />
+            <CategoryRowView key={c.id} category={c} apps={appsForCategory(data.apps, c)} />
           ))}
         </>
       )}
@@ -111,27 +107,15 @@ function Row({ title, apps }: { title: string; apps: AppRow[] }) {
   );
 }
 
-function CategoryRowView({ category, apps, locked }: { category: CategoryRow; apps: AppRow[]; locked: boolean }) {
+function CategoryRowView({ category, apps }: { category: CategoryRow; apps: AppRow[] }) {
   return (
     <section className="mt-12">
-      <h2 className={`px-4 sm:px-14 text-xl sm:text-2xl font-bold ${category.is_vip ? "text-vip" : ""}`}>{category.name}{category.is_vip && !locked ? " · Unlocked" : ""}</h2>
+      <h2 className={`px-4 sm:px-14 text-xl sm:text-2xl font-bold ${category.is_vip ? "text-vip" : ""}`}>{category.is_vip ? "👑 " : ""}{category.name}</h2>
       <div className="no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto px-4 sm:px-14 py-6">
-        {locked ? (
-          <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex h-64 w-[85vw] sm:w-[34rem] shrink-0 items-center gap-6 rounded-2xl border-vip/60 p-8">
-            <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-vip/20 text-4xl"><Lock className="h-9 w-9 text-vip" /></span>
-            <span className="text-left">
-              <span className="block text-2xl font-extrabold">VIP user area</span>
-              <span className="mt-1 block text-lg text-muted-foreground">{apps.length ? `${apps.length} VIP app${apps.length > 1 ? "s" : ""} inside. ` : ""}Press OK to enter your VIP code.</span>
-            </span>
-          </Link>
-        ) : (
-          <>
-            {apps.map((a) => <AppTile key={a.id} app={a} />)}
-            <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex w-40 sm:w-56 shrink-0 items-center justify-center rounded-2xl p-4 text-center text-lg font-semibold text-glow">
-              {apps.length ? `Open ${category.name} ›` : "Coming soon — open category"}
-            </Link>
-          </>
-        )}
+        {apps.map((a) => <AppTile key={a.id} app={a} />)}
+        <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className={`tv-focus glass flex w-40 sm:w-56 shrink-0 items-center justify-center rounded-2xl p-4 text-center text-lg font-semibold ${category.is_vip ? "text-vip" : "text-glow"}`}>
+          {apps.length ? `Open ${category.name} ›` : "Coming soon — open category"}
+        </Link>
       </div>
     </section>
   );
