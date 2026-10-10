@@ -22,7 +22,7 @@ const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: 
 type Draft = TablesInsert<"apps">;
 const empty: Draft = { title: "", package_name: "", version: "1.0.0", build_number: 1, description: "", changelog: "", tier: "free", audiences: ["free", "vip"], is_active: true, is_featured: false, category_id: null, icon_url: null, banner_url: null, screenshots: [], apk_url: null, file_size: null };
 
-export function AppsManager({ editId }: { editId?: string } = {}) {
+export function AppsManager({ editId }: { editId?: string | undefined } = {}) {
   const qc = useQueryClient();
   const apps = useQuery({ queryKey: ["admin-apps"], queryFn: async () => (await supabase.from("apps").select("*").order("created_at", { ascending: false }).throwOnError()).data! });
   const cats = useQuery({ queryKey: ["admin-cats"], queryFn: async () => (await supabase.from("categories").select("*").order("sort_order").throwOnError()).data! });

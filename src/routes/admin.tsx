@@ -16,7 +16,7 @@ import { BroadcastCard } from "@/components/admin/BroadcastCard";
 import { isNative } from "@/lib/native-install";
 
 export const Route = createFileRoute("/admin")({
-  validateSearch: (s: Record<string, unknown>): { edit?: string } => (typeof s.edit === "string" ? { edit: s.edit } : {}),
+  validateSearch: (s: Record<string, unknown>): { edit?: string } => (typeof s["edit"] === "string" ? { edit: s["edit"] } : {}),
   ssr: false,
   head: () => ({
     meta: [
