@@ -25,7 +25,7 @@ export function Logo({ className = "" }: { className?: string }) {
     <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
       <img src={vaultEmblem.url} alt="0G Vault" width={80} height={80} decoding="async" className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" />
       <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground sm:text-xs">by</span>
-      <img src={brandLogo.url} alt="OGSTREAMZ" height={64} decoding="async" className="h-12 w-auto shrink-0 object-contain sm:h-16" />
+      <img src={brandLogo.url} alt="OGSTREAMZ" height={80} decoding="async" className="h-16 w-auto max-w-[60vw] shrink-0 object-contain sm:h-20" />
     </div>
   );
 }
