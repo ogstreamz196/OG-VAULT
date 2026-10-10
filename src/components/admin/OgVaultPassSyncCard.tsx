@@ -74,7 +74,7 @@ export function OgVaultPassSyncCard() {
         <div className="divide-y rounded-lg border">
           {data?.logins.length === 0 && <p className="p-3 text-sm text-muted-foreground">No logins synced yet.</p>}
           {data?.logins.map((l) => (
-            <div key={l.username} className="grid grid-cols-3 gap-3 p-3 text-sm">
+            <div key={l.username} className="grid grid-cols-3 gap-3 break-all p-3 text-xs sm:text-sm">
               <span className="font-medium">{l.username}</span>
               <span className={l.active ? "text-glow" : "text-muted-foreground"}>{l.active ? "Active" : "Inactive"}</span>
               <span className="truncate text-muted-foreground">{l.note}</span>
