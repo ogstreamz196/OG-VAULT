@@ -145,7 +145,11 @@ public class AdbBridgePlugin extends Plugin {
 
     @PluginMethod
     public void launchApp(PluginCall call) {
-        Intent i = getContext().getPackageManager().getLaunchIntentForPackage(call.getString("package"));
+        String pkg = call.getString("package");
+        android.content.pm.PackageManager pm = getContext().getPackageManager();
+        Intent i = pm.getLaunchIntentForPackage(pkg);
+        // Fire TV apps often only declare a LEANBACK launcher.
+        if (i == null) i = pm.getLeanbackLaunchIntentForPackage(pkg);
         if (i == null) { call.reject("App is not installed"); return; }
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); getContext().startActivity(i); call.resolve();
     }
@@ -154,5 +158,20 @@ public class AdbBridgePlugin extends Plugin {
     public void openAppSettings(PluginCall call) {
         Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + call.getString("package")));
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); getContext().startActivity(i); call.resolve();
+    }
+
+    @PluginMethod
+    public void isTv(PluginCall call) {
+        android.content.pm.PackageManager pm = getContext().getPackageManager();
+        boolean tv = pm.hasSystemFeature("android.software.leanback") || pm.hasSystemFeature("amazon.hardware.fire_tv");
+        JSObject r = new JSObject(); r.put("tv", tv); call.resolve(r);
+    }
+
+    @PluginMethod
+    public void isInstalled(PluginCall call) {
+        boolean ok;
+        try { getContext().getPackageManager().getPackageInfo(call.getString("package"), 0); ok = true; }
+        catch (Exception e) { ok = false; }
+        JSObject r = new JSObject(); r.put("installed", ok); call.resolve(r);
     }
 }
