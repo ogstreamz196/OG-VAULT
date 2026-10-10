@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ToolsRouteImport } from './routes/tools'
+import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as AppIdRouteImport } from './routes/app.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as ApiPublicVaultSyncCronRouteImport } from './routes/api/public/vault-sync-cron'
@@ -26,9 +28,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToolsRoute = ToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UpdatesRoute = UpdatesRouteImport.update({
+  id: '/updates',
+  path: '/updates',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIdRoute = AppIdRouteImport.update({
@@ -50,7 +62,9 @@ const ApiPublicVaultSyncCronRoute = ApiPublicVaultSyncCronRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/search': typeof SearchRoute
   '/tools': typeof ToolsRoute
+  '/updates': typeof UpdatesRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
@@ -58,7 +72,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/search': typeof SearchRoute
   '/tools': typeof ToolsRoute
+  '/updates': typeof UpdatesRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
@@ -67,7 +83,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/search': typeof SearchRoute
   '/tools': typeof ToolsRoute
+  '/updates': typeof UpdatesRoute
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
@@ -77,7 +95,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/search'
     | '/tools'
+    | '/updates'
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
@@ -85,7 +105,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/search'
     | '/tools'
+    | '/updates'
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
@@ -93,7 +115,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/search'
     | '/tools'
+    | '/updates'
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
@@ -102,7 +126,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  SearchRoute: typeof SearchRoute
   ToolsRoute: typeof ToolsRoute
+  UpdatesRoute: typeof UpdatesRoute
   AppIdRoute: typeof AppIdRoute
   CategorySlugRoute: typeof CategorySlugRoute
   ApiPublicVaultSyncCronRoute: typeof ApiPublicVaultSyncCronRoute
@@ -124,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tools': {
       id: '/tools'
       path: '/tools'
       fullPath: '/tools'
       preLoaderRoute: typeof ToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/updates': {
+      id: '/updates'
+      path: '/updates'
+      fullPath: '/updates'
+      preLoaderRoute: typeof UpdatesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$id': {
@@ -158,7 +198,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  SearchRoute: SearchRoute,
   ToolsRoute: ToolsRoute,
+  UpdatesRoute: UpdatesRoute,
   AppIdRoute: AppIdRoute,
   CategorySlugRoute: CategorySlugRoute,
   ApiPublicVaultSyncCronRoute: ApiPublicVaultSyncCronRoute,
