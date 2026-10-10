@@ -27,7 +27,7 @@ export function StoreHeader() {
   return (
     <>
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 pt-5 sm:flex sm:flex-wrap sm:justify-between sm:gap-4 sm:px-14 sm:pt-8">
-        <Link to="/" data-nav className="tv-focus min-w-0 rounded-lg"><Logo className="[&_span:last-child]:hidden sm:[&_span:last-child]:inline" /></Link>
+        <Link to="/" data-nav className="tv-focus min-w-0 rounded-lg"><Logo /></Link>
         <nav className="flex shrink-0 items-center gap-2 sm:flex-wrap sm:gap-3">
           <Link data-nav to="/" className={`${pill} text-muted-foreground`} activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
           <Link data-nav to="/search" className={`${pill} text-muted-foreground`} activeProps={{ className: "text-foreground" }}>🔍 Search</Link>
