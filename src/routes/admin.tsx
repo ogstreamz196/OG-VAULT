@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { BrandLoader } from "@/components/tv/BrandLoader";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +33,7 @@ export const Route = createFileRoute("/admin")({
 
 function AdminPage() {
   const { ready, user, isAdmin, username, signOut } = useAuth();
-  if (!ready) return <div className="min-h-screen" />;
+  if (!ready) return <BrandLoader />;
   if (isNative())
     return (
       <div className="mx-auto max-w-md space-y-4 p-10 text-center">
