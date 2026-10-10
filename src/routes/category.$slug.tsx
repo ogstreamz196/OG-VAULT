@@ -11,10 +11,10 @@ import { VipLock } from "@/components/tv/VipLock";
 export const Route = createFileRoute("/category/$slug")({
   head: () => ({
     meta: [
-      { title: "Category — OG VAULT" },
-      { name: "description", content: "Browse apps in this OG VAULT category." },
-      { property: "og:title", content: "Category — OG VAULT" },
-      { property: "og:description", content: "Browse a category of OGSTREAMZ apps on OG VAULT." },
+      { title: "Category — 0G VAULT" },
+      { name: "description", content: "Browse apps in this 0G VAULT category." },
+      { property: "og:title", content: "Category — 0G VAULT" },
+      { property: "og:description", content: "Browse a category of OGSTREAMZ apps on 0G VAULT." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

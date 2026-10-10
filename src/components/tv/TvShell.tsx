@@ -22,7 +22,7 @@ export function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-baseline gap-2 font-display ${className}`}>
       <span className="text-3xl font-extrabold tracking-tight text-foreground">
-        OG<span className="text-glow">VAULT</span>
+        0G<span className="text-glow">VAULT</span>
       </span>
       <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">by OGSTREAMZ</span>
     </div>

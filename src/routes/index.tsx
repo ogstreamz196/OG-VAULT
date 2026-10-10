@@ -14,9 +14,9 @@ import { AppTile } from "@/components/tv/AppTile";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OG VAULT — OGSTREAMZ App Store for Firestick" },
+      { title: "0G VAULT — OGSTREAMZ App Store for Firestick" },
       { name: "description", content: "Browse and install OGSTREAMZ apps on your Firestick with a remote-friendly app store." },
-      { property: "og:title", content: "OG VAULT — OGSTREAMZ App Store" },
+      { property: "og:title", content: "0G VAULT — OGSTREAMZ App Store" },
       { property: "og:description", content: "The remote-friendly APK store for Firestick by OGSTREAMZ." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

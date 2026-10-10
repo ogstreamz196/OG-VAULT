@@ -63,7 +63,7 @@ export const syncVaultNow = createServerFn({ method: "POST" })
     return syncVault();
   });
 
-/** Store sign-in: only active synced OG Vault logins get a session. */
+/** Store sign-in: only active synced 0G Vault logins get a session. */
 export const vaultSignIn = createServerFn({ method: "POST" })
   .inputValidator((d) => z.object({ username: z.string().trim().min(1).max(200), password: z.string().min(1).max(500) }).parse(d))
   .handler(async ({ data }) => {
@@ -77,10 +77,10 @@ export const vaultSignIn = createServerFn({ method: "POST" })
     const matches = (r: Awaited<ReturnType<typeof findRow>>) => !!r && r.active && safeEqual(r.password, data.password);
 
     const live = await verifyLive(data.username, data.password);
-    if (live === false) return { ok: false as const, error: "Wrong OG Vault ID or PIN" };
+    if (live === false) return { ok: false as const, error: "Wrong 0G Vault ID or PIN" };
     let row = await findRow();
     if (!matches(row) && live === true) { await syncVault(); row = await findRow(); }
-    if (!row || !matches(row)) return { ok: false as const, error: "Wrong OG Vault ID or PIN" };
+    if (!row || !matches(row)) return { ok: false as const, error: "Wrong 0G Vault ID or PIN" };
 
     const local = vaultEmailLocal(row.username);
     const email = `${local}@users.ogvault.app`;
@@ -101,7 +101,7 @@ export const vaultSignIn = createServerFn({ method: "POST" })
         if (u) { userId = u.id; await supabaseAdmin.auth.admin.updateUserById(u.id, { password: authPw }); }
       }
     }
-    // Every active OG Vault pass holder is a VIP.
+    // Every active 0G Vault pass holder is a VIP.
     if (userId) {
       const { error: vipErr } = await supabaseAdmin.from("vip_members").upsert({ user_id: userId, expires_at: null, code_id: null }, { onConflict: "user_id" });
       if (vipErr) console.error("[vault] vip grant failed", vipErr.message);

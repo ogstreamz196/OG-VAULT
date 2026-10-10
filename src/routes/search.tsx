@@ -11,10 +11,10 @@ import { AppTile } from "@/components/tv/AppTile";
 export const Route = createFileRoute("/search")({
   head: () => ({
     meta: [
-      { title: "Search apps — OG VAULT" },
-      { name: "description", content: "Find any app in the OG VAULT store with your remote." },
-      { property: "og:title", content: "Search apps — OG VAULT" },
-      { property: "og:description", content: "Remote-friendly search across every OG VAULT app." },
+      { title: "Search apps — 0G VAULT" },
+      { name: "description", content: "Find any app in the 0G VAULT store with your remote." },
+      { property: "og:title", content: "Search apps — 0G VAULT" },
+      { property: "og:description", content: "Remote-friendly search across every 0G VAULT app." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

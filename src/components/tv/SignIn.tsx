@@ -17,7 +17,7 @@ export function SignIn() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!username.trim() || !password) return setError("Enter your OG Vault ID and PIN");
+    if (!username.trim() || !password) return setError("Enter your 0G Vault ID and PIN");
     setBusy(true);
     try {
       const r = await vaultSignIn({ data: { username, password } });
@@ -53,7 +53,7 @@ export function SignIn() {
           <p className="text-xs uppercase tracking-[0.35em] text-glow">Vault access</p>
           <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">Enter the vault</h1>
         </div>
-        <input data-nav data-nav-autofocus className={field} placeholder="OG Vault ID" autoComplete="username" autoCapitalize="none" autoCorrect="off" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input data-nav data-nav-autofocus className={field} placeholder="0G Vault ID" autoComplete="username" autoCapitalize="none" autoCorrect="off" value={username} onChange={(e) => setUsername(e.target.value)} />
         <input data-nav className={field} type="password" placeholder="PIN" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
         {error && <p role="alert" className="rounded-xl border border-vip/60 bg-vip/15 px-4 py-3 text-base sm:text-lg">{error}</p>}
         <button data-nav type="submit" disabled={busy} className={`${btn} w-full bg-primary text-primary-foreground disabled:opacity-60`}>

@@ -14,10 +14,10 @@ import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 export const Route = createFileRoute("/app/$id")({
   head: () => ({
     meta: [
-      { title: "App details — OG VAULT" },
-      { name: "description", content: "App details, screenshots, changelog and install on OG VAULT." },
-      { property: "og:title", content: "App details — OG VAULT" },
-      { property: "og:description", content: "View screenshots, changelog and install this app from OG VAULT." },
+      { title: "App details — 0G VAULT" },
+      { name: "description", content: "App details, screenshots, changelog and install on 0G VAULT." },
+      { property: "og:title", content: "App details — 0G VAULT" },
+      { property: "og:description", content: "View screenshots, changelog and install this app from 0G VAULT." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

@@ -10,9 +10,9 @@ import { AppTile } from "@/components/tv/AppTile";
 export const Route = createFileRoute("/updates")({
   head: () => ({
     meta: [
-      { title: "Updates & installed apps — OG VAULT" },
-      { name: "description", content: "See which of your OG VAULT apps have new versions ready to install." },
-      { property: "og:title", content: "Updates — OG VAULT" },
+      { title: "Updates & installed apps — 0G VAULT" },
+      { name: "description", content: "See which of your 0G VAULT apps have new versions ready to install." },
+      { property: "og:title", content: "Updates — 0G VAULT" },
       { property: "og:description", content: "New versions of your installed apps, in one place." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -45,7 +45,7 @@ function Updates() {
         )}
       </section>
       <section className="mt-12 px-4 sm:px-14">
-        <h2 className="text-2xl font-bold">Installed from OG VAULT ({lists.installed.length})</h2>
+        <h2 className="text-2xl font-bold">Installed from 0G VAULT ({lists.installed.length})</h2>
         {lists.installed.length ? (
           <div className="mt-6 flex flex-wrap gap-6">{lists.installed.map((a) => <AppTile key={a.id} app={a} />)}</div>
         ) : (
