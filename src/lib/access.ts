@@ -21,8 +21,8 @@ export type Level = "none" | "guest" | "free" | "vip" | "admin";
 export const AUDIENCES = ["guest", "free", "vip", "boss"] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
-const BROWSE: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["free", "vip"], guest: ["guest"] };
-const DOWNLOAD: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["free"], guest: ["guest"] };
+const BROWSE: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["guest", "free", "vip"], guest: ["guest"] };
+const DOWNLOAD: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["guest", "free"], guest: ["guest"] };
 
 /** Boss sees all. VIP sees guest/free/vip. Free sees free + VIP (locked). Guest sees guest only. */
 export function canSeeApp(level: Level, audiences: string[]): boolean {
