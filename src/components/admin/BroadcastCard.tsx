@@ -22,7 +22,7 @@ export function BroadcastCard() {
 
   return (
     <div className="glass space-y-3 rounded-xl p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-bold">📣 Store Broadcast</h3>
         <label className="flex items-center gap-2 text-sm"><Switch checked={active} onCheckedChange={setActive} />Show on store</label>
       </div>

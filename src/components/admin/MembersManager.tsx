@@ -43,7 +43,8 @@ export function MembersManager() {
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Members</h2>
       <Input className="max-w-xs" placeholder="Search username…" value={q} onChange={(e) => setQ(e.target.value)} />
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] text-sm">
         <thead className="text-left text-muted-foreground"><tr><th className="p-2">Username</th><th>Joined</th><th>VIP</th><th /></tr></thead>
         <tbody>
           {data?.profiles.filter((p) => p.username.toLowerCase().includes(q.trim().toLowerCase())).map((p) => (
@@ -53,13 +54,14 @@ export function MembersManager() {
               <td className={active(p.id) ? "text-vip font-bold" : "text-muted-foreground"}>
                 {active(p.id) ? `VIP${data?.vip.get(p.id)?.expires_at ? ` until ${new Date(data.vip.get(p.id)!.expires_at!).toLocaleDateString()}` : ""}` : "Member"}
               </td>
-              <td className="py-2 text-right">
+              <td className="whitespace-nowrap py-2 text-right">
                 {active(p.id) ? <Button size="sm" variant="secondary" onClick={() => revoke(p.id)}>Remove VIP</Button> : <span className="inline-flex gap-1"><select className="rounded-md border bg-background px-2 text-sm" value={dur[p.id] ?? "30"} onChange={(e) => setDur((d) => ({ ...d, [p.id]: e.target.value }))}>{DURATIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><Button size="sm" onClick={() => grant(p.id)}>Grant VIP</Button></span>}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      </div>
       {data?.profiles.length === 0 && <p className="text-muted-foreground">No members yet.</p>}
     </div>
   );

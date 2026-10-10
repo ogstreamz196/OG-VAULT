@@ -41,7 +41,7 @@ export function R2StorageCard() {
   const set = (k: keyof typeof f, v: string | boolean) => setF((p) => ({ ...p, [k]: v }));
   return (
     <div className="glass space-y-4 rounded-xl p-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-bold">Cloudflare R2 Storage</h3>
         <span className={`rounded px-2 py-0.5 text-xs font-bold ${f.enabled ? "border border-glow text-glow" : "border text-muted-foreground"}`}>{f.enabled ? "R2 ACTIVE" : "USING BUILT-IN STORAGE"}</span>
       </div>

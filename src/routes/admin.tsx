@@ -52,17 +52,17 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b px-8 py-4">
-        <div className="flex items-center gap-4"><Logo /><span className="rounded-md border border-glow/60 px-2 py-0.5 text-xs font-bold text-glow">BOSS CONTROL PANEL</span></div>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-glow">‹ Back to store</Link>
-          <span>{user.email ?? username}</span>
-          <Button size="sm" variant="secondary" onClick={() => signOut()}>Sign out</Button>
+      <header className="flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <div className="flex min-w-0 items-center justify-between gap-3 sm:justify-start sm:gap-4"><Logo /><span className="shrink-0 rounded-md border border-glow/60 px-2 py-0.5 text-[10px] font-bold text-glow sm:text-xs">BOSS CONTROLS</span></div>
+        <div className="flex min-w-0 items-center gap-3 text-sm text-muted-foreground">
+          <Link to="/" className="shrink-0 whitespace-nowrap hover:text-glow">‹ Store</Link>
+          <span className="min-w-0 flex-1 truncate">{user.email ?? username}</span>
+          <Button size="sm" variant="secondary" className="shrink-0" onClick={() => signOut()}>Sign out</Button>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl p-8">
+      <main className="mx-auto max-w-6xl px-3 py-4 sm:p-8">
         <Tabs defaultValue="apps">
-          <TabsList className="mb-6 flex-wrap">
+          <TabsList className="mb-6 flex h-auto w-full flex-nowrap justify-start overflow-x-auto [&>button]:shrink-0">
             <TabsTrigger value="apps">Apps & Media</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
             <TabsTrigger value="vip">VIP Users & Codes</TabsTrigger>

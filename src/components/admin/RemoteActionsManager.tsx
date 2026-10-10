@@ -66,16 +66,18 @@ export function RemoteActionsManager() {
 
       <div className="space-y-2">
         {data.map((r, i) => (
-          <div key={r.id} className="glass flex flex-wrap items-center gap-3 rounded-xl p-3">
+          <div key={r.id} className="glass flex flex-col gap-3 rounded-xl p-3 sm:flex-row sm:items-center">
             <div className="min-w-0 flex-1">
               <p className="font-semibold">{r.label} <span className="text-xs text-muted-foreground">({r.audiences.join(", ")})</span></p>
-              <p className="truncate font-mono text-xs text-muted-foreground">{r.command}</p>
+              <p className="break-all font-mono text-xs text-muted-foreground sm:truncate">{r.command}</p>
             </div>
-            <Switch checked={r.is_active} onCheckedChange={(v) => patch(r.id, { is_active: v })} />
-            <Button size="sm" variant="outline" onClick={() => move(i, -1)}>↑</Button>
-            <Button size="sm" variant="outline" onClick={() => move(i, 1)}>↓</Button>
-            <Button size="sm" variant="outline" onClick={() => { setEditId(r.id); setForm({ label: r.label, description: r.description, icon: r.icon, command: r.command, needs_confirmation: r.needs_confirmation, audiences: r.audiences }); }}>Edit</Button>
-            <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>Delete</Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Switch className="mr-auto" checked={r.is_active} onCheckedChange={(v) => patch(r.id, { is_active: v })} />
+              <Button size="sm" variant="outline" onClick={() => move(i, -1)}>↑</Button>
+              <Button size="sm" variant="outline" onClick={() => move(i, 1)}>↓</Button>
+              <Button size="sm" variant="outline" onClick={() => { setEditId(r.id); setForm({ label: r.label, description: r.description, icon: r.icon, command: r.command, needs_confirmation: r.needs_confirmation, audiences: r.audiences }); }}>Edit</Button>
+              <Button size="sm" variant="destructive" onClick={() => remove(r.id)}>Delete</Button>
+            </div>
           </div>
         ))}
       </div>

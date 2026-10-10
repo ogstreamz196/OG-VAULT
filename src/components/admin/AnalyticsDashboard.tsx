@@ -58,7 +58,7 @@ export function AnalyticsDashboard() {
         ))}
         <Button size="sm" variant="outline" onClick={() => events.refetch()}>Refresh</Button>
       </div>
-      <div className="grid gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {[["Downloads", tot.d], ["Install attempts", tot.i], ["Failures", tot.f], ["Failure rate", tot.d ? `${((tot.f / tot.d) * 100).toFixed(1)}%` : "—"]].map(([k, v]) => (
           <Card key={k}><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{k}</CardTitle></CardHeader><CardContent className="text-3xl font-bold">{v}</CardContent></Card>
         ))}
@@ -69,7 +69,7 @@ export function AnalyticsDashboard() {
           {starts.length === 0 ? <p className="text-muted-foreground">No downloads yet.</p> : (
             <>
               <div className="flex h-4 overflow-hidden rounded-full bg-secondary"><div className="bg-primary" style={{ width: `${(stick / starts.length) * 100}%` }} /></div>
-              <div className="mt-2 flex justify-between text-sm"><span className="text-primary">Firestick / app: {stick} ({Math.round((stick / starts.length) * 100)}%)</span><span className="text-muted-foreground">Web browser: {starts.length - stick} ({Math.round(((starts.length - stick) / starts.length) * 100)}%)</span></div>
+              <div className="mt-2 flex flex-wrap justify-between gap-2 text-sm"><span className="text-primary">Firestick / app: {stick} ({Math.round((stick / starts.length) * 100)}%)</span><span className="text-muted-foreground">Web browser: {starts.length - stick} ({Math.round(((starts.length - stick) / starts.length) * 100)}%)</span></div>
             </>
           )}
         </CardContent>
@@ -94,7 +94,7 @@ export function AnalyticsDashboard() {
       <Card>
         <CardHeader><CardTitle>By app</CardTitle></CardHeader>
         <CardContent className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[720px] text-sm">
             <thead className="text-left text-muted-foreground"><tr><th className="py-2">App</th><th>Downloads</th><th>Completed</th><th>Installs</th><th>Failures</th><th>Fail rate</th><th>Last error</th></tr></thead>
             <tbody>
               {stats.map((s) => (
