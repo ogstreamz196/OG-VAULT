@@ -10,6 +10,7 @@ export function StoreHeader() {
       <nav className="flex flex-wrap items-center gap-3">
         <Link data-nav to="/" className="tv-focus hidden rounded-xl px-5 py-2.5 font-semibold text-muted-foreground sm:inline-block" activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
         <Link data-nav to="/category/$slug" params={{ slug: "og-vip-access" }} className="tv-focus rounded-xl px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-semibold text-vip">OG VIP ACCESS</Link>
+        <Link data-nav to="/tools" className="tv-focus rounded-xl px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-semibold text-muted-foreground">Tools</Link>
         {isAdmin && (
           <Link data-nav to="/admin" className="tv-focus rounded-xl border border-glow/60 px-3 py-2 text-sm sm:px-5 sm:py-2.5 sm:text-base font-bold text-glow">Boss Control Panel</Link>
         )}
