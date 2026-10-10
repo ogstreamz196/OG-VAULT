@@ -7,7 +7,7 @@ export async function checkM3u(username: string, password: string): Promise<M3uR
   const url = `${HOST}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
-    if (!res.ok) return res.status === 401 || res.status === 403 ? "invalid" : "unreachable";
+    if (!res.ok) return res.status >= 500 && res.status !== 512 && res.status < 600 ? "unreachable" : "invalid";
     const j = (await res.json().catch(() => null)) as { user_info?: { auth?: number | string; status?: string; exp_date?: string | null } } | null;
     const u = j?.user_info;
     if (!u || Number(u.auth) !== 1) return "invalid";
