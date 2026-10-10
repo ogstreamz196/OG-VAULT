@@ -23,9 +23,9 @@ export function TvShell({ children, onBack }: { children: ReactNode; onBack?: ((
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
-      <img src={vaultEmblem.url} alt="0G Vault" width={56} height={56} decoding="async" className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-glow/50 sm:h-14 sm:w-14" style={{ boxShadow: "0 0 16px color-mix(in oklab, var(--glow) 40%, transparent)" }} />
+      <img src={vaultEmblem.url} alt="0G Vault" width={80} height={80} decoding="async" className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" />
       <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground sm:text-xs">by</span>
-      <img src={brandLogo.url} alt="OGSTREAMZ" height={40} decoding="async" className="h-9 w-auto shrink-0 rounded-md object-contain sm:h-11" />
+      <img src={brandLogo.url} alt="OGSTREAMZ" height={64} decoding="async" className="h-12 w-auto shrink-0 object-contain sm:h-16" />
     </div>
   );
 }
