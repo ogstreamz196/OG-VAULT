@@ -26,6 +26,8 @@ export function AppsManager() {
   const apps = useQuery({ queryKey: ["admin-apps"], queryFn: async () => (await supabase.from("apps").select("*").order("created_at", { ascending: false }).throwOnError()).data! });
   const cats = useQuery({ queryKey: ["admin-cats"], queryFn: async () => (await supabase.from("categories").select("*").order("sort_order").throwOnError()).data! });
   const [editing, setEditing] = useState<Draft | null>(null);
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("all");
 
   const refresh = () => { qc.invalidateQueries({ queryKey: ["admin-apps"] }); qc.invalidateQueries({ queryKey: ["catalog"] }); };
 
@@ -36,6 +38,15 @@ export function AppsManager() {
     toast.success("App deleted");
     refresh();
   }
+  async function toggle(a: AppRow, p: { is_active?: boolean; is_featured?: boolean }) {
+    const { error } = await supabase.from("apps").update(p).eq("id", a.id);
+    if (error) toast.error(error.message); else refresh();
+  }
+
+  const needle = q.trim().toLowerCase();
+  const list = (apps.data ?? []).filter((a) =>
+    (cat === "all" || (cat === "none" ? !a.category_id : a.category_id === cat)) &&
+    (!needle || a.title.toLowerCase().includes(needle) || a.package_name.toLowerCase().includes(needle)));
 
   return (
     <div className="space-y-4">
@@ -43,19 +54,30 @@ export function AppsManager() {
         <h2 className="text-2xl font-bold">App Catalog</h2>
         <Button onClick={() => setEditing({ ...empty })}>Add app</Button>
       </div>
+      <div className="flex flex-wrap gap-2">
+        <Input className="max-w-xs" placeholder="Search title or package…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className="rounded-md border bg-background px-3 text-sm" value={cat} onChange={(e) => setCat(e.target.value)}>
+          <option value="all">All categories</option>
+          <option value="none">No category</option>
+          {cats.data?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
       <div className="grid gap-3">
-        {apps.data?.map((a) => (
-          <div key={a.id} className="glass flex items-center gap-4 rounded-xl p-3">
+        {list.map((a) => (
+          <div key={a.id} className="glass flex flex-wrap items-center gap-4 rounded-xl p-3">
             <AppIcon title={a.title} url={a.icon_url} className="h-14 w-14 rounded-lg text-lg" />
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2"><span className="truncate font-semibold">{a.title}</span>{a.audiences.map((x) => <span key={x} className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${x === "vip" ? "bg-vip text-primary-foreground" : x === "guest" ? "border border-muted-foreground text-muted-foreground" : "border border-glow/60 text-glow"}`}>{x}</span>)}{!a.is_active && <span className="text-xs text-muted-foreground">(hidden)</span>}{a.is_featured && <span className="text-xs text-glow">★ featured</span>}</div>
-              <div className="truncate text-sm text-muted-foreground">{a.package_name} · v{a.version} ({a.build_number}) · {cats.data?.find((c) => c.id === a.category_id)?.name ?? "No category"} · {a.apk_url ? "APK ready" : "No APK"}</div>
+              <div className="flex items-center gap-2"><span className="truncate font-semibold">{a.title}</span>{a.audiences.map((x) => <span key={x} className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${x === "vip" ? "bg-vip text-primary-foreground" : x === "guest" ? "border border-muted-foreground text-muted-foreground" : "border border-glow/60 text-glow"}`}>{x}</span>)}</div>
+              <div className="truncate text-sm text-muted-foreground">{a.package_name || "no package"} · v{a.version} ({a.build_number}) · {cats.data?.find((c) => c.id === a.category_id)?.name ?? "No category"} · {a.apk_url ? "APK ready" : "No APK"}</div>
             </div>
+            <label className="flex items-center gap-1.5 text-xs"><Switch checked={a.is_active} onCheckedChange={(v) => toggle(a, { is_active: v })} />Active</label>
+            <label className="flex items-center gap-1.5 text-xs text-glow"><Switch checked={a.is_featured} onCheckedChange={(v) => toggle(a, { is_featured: v })} />Featured</label>
             <Button variant="secondary" onClick={() => setEditing({ ...a })}>Edit</Button>
             <Button variant="destructive" onClick={() => remove(a)}>Delete</Button>
           </div>
         ))}
         {apps.data?.length === 0 && <p className="text-muted-foreground">No apps yet.</p>}
+        {!!apps.data?.length && list.length === 0 && <p className="text-muted-foreground">No apps match.</p>}
       </div>
       {editing && <AppEditor draft={editing} categories={cats.data ?? []} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); refresh(); }} />}
     </div>

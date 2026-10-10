@@ -1,7 +1,11 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+const DURATIONS = [["30", "1 month"], ["90", "3 months"], ["180", "6 months"], ["365", "1 year"], ["0", "Lifetime"]] as const;
 
 export function MembersManager() {
   const qc = useQueryClient();
@@ -17,8 +21,12 @@ export function MembersManager() {
   });
   const refresh = () => qc.invalidateQueries({ queryKey: ["members"] });
 
+  const [dur, setDur] = useState<Record<string, string>>({});
+  const [q, setQ] = useState("");
   async function grant(id: string) {
-    const { error } = await supabase.from("vip_members").upsert({ user_id: id, expires_at: null, code_id: null });
+    const days = Number(dur[id] ?? "30");
+    const expires_at = days > 0 ? new Date(Date.now() + days * 864e5).toISOString() : null;
+    const { error } = await supabase.from("vip_members").upsert({ user_id: id, expires_at, code_id: null });
     if (error) toast.error(error.message); else { toast.success("VIP granted"); refresh(); }
   }
   async function revoke(id: string) {
@@ -34,10 +42,11 @@ export function MembersManager() {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">Members</h2>
+      <Input className="max-w-xs" placeholder="Search username…" value={q} onChange={(e) => setQ(e.target.value)} />
       <table className="w-full text-sm">
         <thead className="text-left text-muted-foreground"><tr><th className="p-2">Username</th><th>Joined</th><th>VIP</th><th /></tr></thead>
         <tbody>
-          {data?.profiles.map((p) => (
+          {data?.profiles.filter((p) => p.username.toLowerCase().includes(q.trim().toLowerCase())).map((p) => (
             <tr key={p.id} className="border-t">
               <td className="p-2 font-semibold">{p.username}</td>
               <td>{new Date(p.created_at).toLocaleDateString()}</td>
@@ -45,7 +54,7 @@ export function MembersManager() {
                 {active(p.id) ? `VIP${data?.vip.get(p.id)?.expires_at ? ` until ${new Date(data.vip.get(p.id)!.expires_at!).toLocaleDateString()}` : ""}` : "Member"}
               </td>
               <td className="py-2 text-right">
-                {active(p.id) ? <Button size="sm" variant="secondary" onClick={() => revoke(p.id)}>Remove VIP</Button> : <Button size="sm" onClick={() => grant(p.id)}>Grant VIP</Button>}
+                {active(p.id) ? <Button size="sm" variant="secondary" onClick={() => revoke(p.id)}>Remove VIP</Button> : <span className="inline-flex gap-1"><select className="rounded-md border bg-background px-2 text-sm" value={dur[p.id] ?? "30"} onChange={(e) => setDur((d) => ({ ...d, [p.id]: e.target.value }))}>{DURATIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><Button size="sm" onClick={() => grant(p.id)}>Grant VIP</Button></span>}
               </td>
             </tr>
           ))}

@@ -12,6 +12,10 @@ const slugify = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-"
 export function CategoriesManager() {
   const qc = useQueryClient();
   const { data = [] } = useQuery({ queryKey: ["admin-cats"], queryFn: async () => (await supabase.from("categories").select("*").order("sort_order").throwOnError()).data! });
+  const { data: counts } = useQuery({ queryKey: ["admin-cat-counts"], queryFn: async () => {
+    const rows = (await supabase.from("apps").select("category_id").throwOnError()).data!;
+    const m = new Map<string, number>(); for (const r of rows) if (r.category_id) m.set(r.category_id, (m.get(r.category_id) ?? 0) + 1); return m;
+  } });
   const [name, setName] = useState("");
   const refresh = () => { qc.invalidateQueries({ queryKey: ["admin-cats"] }); qc.invalidateQueries({ queryKey: ["catalog"] }); };
 
@@ -55,6 +59,7 @@ export function CategoriesManager() {
           <div key={c.id} className="glass flex items-center gap-2 rounded-xl p-2">
             <span className="w-8 text-center text-muted-foreground">{i + 1}</span>
             <Input defaultValue={c.name} onBlur={(e) => rename(c, e.target.value)} />
+            <span className="whitespace-nowrap rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{counts?.get(c.id) ?? 0} apps</span>
             <label className="flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
             <Button variant="secondary" size="sm" disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
             <Button variant="secondary" size="sm" disabled={i === data.length - 1} onClick={() => move(i, 1)}>↓</Button>
