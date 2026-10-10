@@ -1,21 +1,14 @@
-# AdbBridge native plugin (phone app)
+# OG VAULT Android app (phone + Firestick, one APK)
 
-Turns the Tools page from simulator mode into real Firestick control.
+The `android/` folder is ready to open in Android Studio — the ADB plugin, dadb library,
+permissions, Fire TV banner/launcher and icons are already wired in.
 
-1. `npx cap add android` (once), then `npm run build && npx cap sync android`.
-2. Copy `AdbBridgePlugin.java` to `android/app/src/main/java/com/ogstreamz/ogvault/`.
-3. In `android/app/build.gradle` dependencies add:
-   `implementation "dev.mobile:dadb:1.2.7"`
-4. In `MainActivity.java`:
-   ```java
-   public class MainActivity extends BridgeActivity {
-     @Override public void onCreate(Bundle b) { registerPlugin(AdbBridgePlugin.class); super.onCreate(b); }
-   }
-   ```
-5. `AndroidManifest.xml` already has INTERNET; also add
-   `<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>`.
-6. Build the APK in Android Studio, install on the phone, open Tools, enter the Firestick IP, Connect, accept the prompt on the TV (tick "Always allow").
+1. Open the `android` folder in Android Studio (needs JDK 21, bundled with recent Studio).
+2. Click **Sync Project with Gradle Files**.
+3. **Build → Build App Bundle(s) / APK(s) → Build APK(s)**.
 
-## New in this version
-- `install` (Send to Firestick), `scan` (Wi-Fi auto-find), `launchApp`, `openAppSettings`.
-- Needs `<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />` and `INTERNET` in AndroidManifest.xml.
+The app loads the live store from https://vault.ogstreamz.co.uk, so store changes need no rebuild.
+Only rebuild after changing `capacitor.config.ts` or native code (`npx cap sync android` first).
+
+`AdbBridgePlugin.java` here is the master copy; it is also copied into
+`android/app/src/main/java/com/ogstreamz/ogvault/`. Keep both in sync.
