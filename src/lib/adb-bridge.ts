@@ -39,7 +39,7 @@ function simulate(cmd: string): string {
   if (cmd.startsWith("df")) return "Filesystem  Size  Used Avail Use% Mounted on\n/data       5.4G  3.1G  2.3G  58% /data";
   if (cmd.startsWith("pm clear")) return "Success";
   if (cmd.startsWith("pm trim-caches")) return "Caches trimmed (≈412 MB freed)";
-  if (cmd.startsWith("pm list packages")) return "package:com.ogstreamz.ogvault\npackage:org.xbmc.kodi\npackage:com.netflix.ninja";
+  if (cmd.startsWith("pm list packages")) return "package:og.vault\npackage:org.xbmc.kodi\npackage:com.netflix.ninja";
   if (cmd === "reboot") return "Reboot command sent";
   return "OK";
 }

@@ -1,4 +1,4 @@
-package com.ogstreamz.ogvault;
+package og.vault;
 
 import android.os.Bundle;
 import com.getcapacitor.BridgeActivity;
