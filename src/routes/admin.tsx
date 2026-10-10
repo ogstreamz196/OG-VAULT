@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/tv/TvShell";
 import { AppsManager } from "@/components/admin/AppsManager";
 import { CategoriesManager } from "@/components/admin/CategoriesManager";
-import { VipManager } from "@/components/admin/VipManager";
 import { MembersManager } from "@/components/admin/MembersManager";
 import { OgVaultPassSyncCard } from "@/components/admin/OgVaultPassSyncCard";
 import { R2StorageCard } from "@/components/admin/R2StorageCard";
@@ -21,7 +20,7 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
       { title: "Boss Control Panel — 0G VAULT" },
-      { name: "description", content: "Manage 0G VAULT apps, media, APKs, categories, VIP codes and members." },
+      { name: "description", content: "Manage 0G VAULT apps, media, APKs, categories, Vault Pass sync and members." },
       { property: "og:title", content: "Boss Control Panel — 0G VAULT" },
       { property: "og:description", content: "OGSTREAMZ boss control panel for the 0G VAULT store." },
       { property: "og:type", content: "website" },
@@ -67,14 +66,14 @@ function AdminPage() {
           <TabsList className="mb-6 flex h-auto w-full flex-nowrap justify-start overflow-x-auto [&>button]:shrink-0">
             <TabsTrigger value="apps">Apps & Media</TabsTrigger>
             <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="vip">VIP Users & Codes</TabsTrigger>
+            <TabsTrigger value="vip">VIP Pass Sync</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="remote">Remote Tools</TabsTrigger>
           </TabsList>
           <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager editId={Route.useSearch().edit} /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
-          <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /><VipManager /></TabsContent>
+          <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /></TabsContent>
           <TabsContent value="members"><MembersManager /></TabsContent>
           <TabsContent value="analytics"><AnalyticsDashboard /></TabsContent>
           <TabsContent value="remote"><RemoteActionsManager /></TabsContent>

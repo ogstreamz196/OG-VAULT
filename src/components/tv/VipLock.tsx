@@ -1,38 +1,20 @@
 import { Lock } from "lucide-react";
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
+
+export const VIP_STORE_URL = "https://ogbot.co.uk";
 
 export function VipLock({ title = "OG VIP ACCESS" }: { title?: string }) {
-  const { refreshAccess } = useAuth();
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-
-  async function redeem(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    const { data, error } = await supabase.rpc("redeem_vip_for_me", { _code: code });
-    setBusy(false);
-    const r = data as { ok: boolean; error?: string } | null;
-    if (error || !r?.ok) return setMsg(error?.message ?? r?.error ?? "Invalid code");
-    refreshAccess();
-  }
-
   return (
     <div className="glass mx-auto max-w-2xl space-y-6 rounded-3xl border-vip/50 p-10 text-center">
       <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-vip/20 text-4xl"><Lock className="h-9 w-9 text-vip" /></div>
       <h2 className="text-4xl font-extrabold">{title}</h2>
-      <p className="text-xl text-muted-foreground">VIP user area. Enter your VIP access code to unlock every VIP app.</p>
-      <form onSubmit={redeem} className="space-y-4">
-        <input data-nav data-nav-autofocus value={code} maxLength={12} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="OG-XXXX-XXXX"
-          className="tv-focus w-full rounded-xl border border-input bg-muted px-5 py-4 text-center font-mono text-2xl uppercase tracking-[0.25em] focus:border-glow" />
-        {msg && <p role="alert" className="text-lg text-vip">{msg}</p>}
-        <button data-nav disabled={busy} className="tv-focus w-full rounded-xl bg-vip px-6 py-4 text-lg font-bold text-primary-foreground disabled:opacity-60">
-          {busy ? "Checking…" : "Unlock VIP"}
-        </button>
-      </form>
+      <p className="text-xl text-muted-foreground">
+        Want VIP access? Visit <span className="font-bold text-foreground">ogbot.co.uk</span> and buy the Vault Pass from the store.
+      </p>
+      <p className="text-lg text-muted-foreground">Then sign in here with your Vault Pass to unlock every VIP app.</p>
+      <a data-nav data-nav-autofocus href={VIP_STORE_URL} target="_blank" rel="noopener noreferrer"
+        className="tv-focus inline-block w-full rounded-xl bg-vip px-6 py-4 text-lg font-bold text-primary-foreground">
+        Visit ogbot.co.uk
+      </a>
     </div>
   );
 }
