@@ -279,6 +279,30 @@ export type Database = {
         }
         Relationships: []
       }
+      store_broadcast: {
+        Row: {
+          id: number
+          is_active: boolean
+          message: string
+          style: string
+          updated_at: string
+        }
+        Insert: {
+          id?: number
+          is_active?: boolean
+          message?: string
+          style?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: number
+          is_active?: boolean
+          message?: string
+          style?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
