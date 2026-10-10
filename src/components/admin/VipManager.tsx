@@ -58,7 +58,7 @@ export function VipManager() {
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-bold">VIP Codes</h2>
-      <div className="glass grid grid-cols-2 gap-3 rounded-xl p-4 md:grid-cols-5">
+      <div className="glass grid grid-cols-1 gap-3 rounded-xl p-4 sm:grid-cols-2 md:grid-cols-5">
         <div><Label>How many</Label><Input type="number" min={1} max={100} value={count} onChange={(e) => setCount(Number(e.target.value))} /></div>
         <div><Label>Device limit</Label><Input type="number" min={1} value={limit} onChange={(e) => setLimit(Number(e.target.value))} /></div>
         <div><Label>Valid days (0 = never expires)</Label><Input type="number" min={0} value={days} onChange={(e) => setDays(Number(e.target.value))} /></div>
@@ -71,7 +71,7 @@ export function VipManager() {
         <Button variant="secondary" onClick={exportCsv}>Export CSV</Button>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="text-left text-muted-foreground"><tr><th className="p-2">Code</th><th>Status</th><th>Accounts</th><th>Expires</th><th>Note</th><th /></tr></thead>
           <tbody>
             {list.map((c) => (

@@ -64,16 +64,22 @@ export function AppsManager() {
       </div>
       <div className="grid gap-3">
         {list.map((a) => (
-          <div key={a.id} className="glass flex flex-wrap items-center gap-4 rounded-xl p-3">
-            <AppIcon title={a.title} url={a.icon_url} className="h-14 w-14 rounded-lg text-lg" />
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2"><span className="truncate font-semibold">{a.title}</span>{a.audiences.map((x) => <span key={x} className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${x === "vip" ? "bg-vip text-primary-foreground" : x === "guest" ? "border border-muted-foreground text-muted-foreground" : "border border-glow/60 text-glow"}`}>{x}</span>)}</div>
-              <div className="truncate text-sm text-muted-foreground">{a.package_name || "no package"} · v{a.version} ({a.build_number}) · {cats.data?.find((c) => c.id === a.category_id)?.name ?? "No category"} · {a.apk_url ? "APK ready" : "No APK"}</div>
+          <div key={a.id} className="glass flex flex-col gap-3 rounded-xl p-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              <AppIcon title={a.title} url={a.icon_url} className="h-14 w-14 shrink-0 rounded-lg text-lg" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5"><span className="truncate font-semibold">{a.title}</span>{a.audiences.map((x) => <span key={x} className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${x === "vip" ? "bg-vip text-primary-foreground" : x === "guest" ? "border border-muted-foreground text-muted-foreground" : "border border-glow/60 text-glow"}`}>{x}</span>)}</div>
+                <div className="break-words text-xs text-muted-foreground sm:text-sm">{a.package_name || "no package"} · v{a.version} ({a.build_number}) · {cats.data?.find((c) => c.id === a.category_id)?.name ?? "No category"} · {a.apk_url ? "APK ready" : "No APK"}</div>
+              </div>
             </div>
-            <label className="flex items-center gap-1.5 text-xs"><Switch checked={a.is_active} onCheckedChange={(v) => toggle(a, { is_active: v })} />Active</label>
-            <label className="flex items-center gap-1.5 text-xs text-glow"><Switch checked={a.is_featured} onCheckedChange={(v) => toggle(a, { is_featured: v })} />Featured</label>
-            <Button variant="secondary" onClick={() => setEditing({ ...a })}>Edit</Button>
-            <Button variant="destructive" onClick={() => remove(a)}>Delete</Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-1.5 text-xs"><Switch checked={a.is_active} onCheckedChange={(v) => toggle(a, { is_active: v })} />Active</label>
+              <label className="flex items-center gap-1.5 text-xs text-glow"><Switch checked={a.is_featured} onCheckedChange={(v) => toggle(a, { is_featured: v })} />Featured</label>
+              <div className="ml-auto flex gap-2">
+                <Button size="sm" variant="secondary" onClick={() => setEditing({ ...a })}>Edit</Button>
+                <Button size="sm" variant="destructive" onClick={() => remove(a)}>Delete</Button>
+              </div>
+            </div>
           </div>
         ))}
         {apps.data?.length === 0 && <p className="text-muted-foreground">No apps yet.</p>}

@@ -56,14 +56,18 @@ export function CategoriesManager() {
       <div className="flex gap-2"><Input placeholder="New category name" value={name} onChange={(e) => setName(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} /><Button onClick={add}>Add</Button></div>
       <div className="space-y-2">
         {data.map((c, i) => (
-          <div key={c.id} className="glass flex items-center gap-2 rounded-xl p-2">
-            <span className="w-8 text-center text-muted-foreground">{i + 1}</span>
-            <Input defaultValue={c.name} onBlur={(e) => rename(c, e.target.value)} />
-            <span className="whitespace-nowrap rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{counts?.get(c.id) ?? 0} apps</span>
-            <label className="flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
-            <Button variant="secondary" size="sm" disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
-            <Button variant="secondary" size="sm" disabled={i === data.length - 1} onClick={() => move(i, 1)}>↓</Button>
-            <Button variant="destructive" size="sm" onClick={() => remove(c)}>Remove</Button>
+          <div key={c.id} className="glass flex flex-col gap-2 rounded-xl p-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <span className="w-6 shrink-0 text-center text-muted-foreground">{i + 1}</span>
+              <Input className="min-w-0 flex-1" defaultValue={c.name} onBlur={(e) => rename(c, e.target.value)} />
+              <span className="shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{counts?.get(c.id) ?? 0} apps</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="mr-auto flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
+              <Button variant="secondary" size="sm" disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
+              <Button variant="secondary" size="sm" disabled={i === data.length - 1} onClick={() => move(i, 1)}>↓</Button>
+              <Button variant="destructive" size="sm" onClick={() => remove(c)}>Remove</Button>
+            </div>
           </div>
         ))}
       </div>
