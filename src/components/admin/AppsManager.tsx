@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { generateStoreCopy } from "@/lib/ai-copy.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia, type AppRow, type CategoryRow } from "@/lib/catalog";
+import { inspectApk, type ApkInfo } from "@/lib/apk-parser";
 import type { TablesInsert } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,6 +79,28 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Generation failed");
     } finally { setBusy(null); }
+  }
+
+  const [apk, setApk] = useState<Omit<ApkInfo, "icon"> | null>(null);
+  async function detect(file?: File) {
+    if (!file) return;
+    try {
+      const info = await inspectApk(file);
+      setApk(info);
+      setD((p) => ({
+        ...p,
+        package_name: info.packageName ?? p.package_name,
+        version: info.versionName ?? p.version,
+        build_number: info.versionCode ?? p.build_number,
+        title: p.title?.trim() ? p.title : info.label && !info.label.startsWith("@") ? info.label : p.title,
+      }));
+      toast.success(`Detected ${info.packageName ?? "app"} v${info.versionName ?? "?"}`);
+      if (info.icon && !d.icon_url) {
+        try { const u = await uploadMedia("app-media", info.icon); set("icon_url", u); } catch { /* optional */ }
+      }
+    } catch (e) {
+      toast.error(`Couldn't read APK details: ${e instanceof Error ? e.message : "unknown"} — fill them in manually`);
+    }
   }
 
   async function upload(bucket: "app-media" | "apks", files: FileList | null, apply: (urls: string[]) => void) {
@@ -175,7 +198,14 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
 
         <div className="space-y-3 rounded-xl border p-4">
           <h3 className="font-semibold">APK</h3>
-          <F label="Upload .apk file"><Input type="file" accept=".apk,application/vnd.android.package-archive" onChange={(e) => upload("apks", e.target.files, ([u]) => set("apk_url", u))} /></F>
+          <F label="Upload .apk file (package, version, build, name & icon fill in automatically)"><Input type="file" accept=".apk,application/vnd.android.package-archive" onChange={async (e) => { const files = e.target.files; await detect(files?.[0]); upload("apks", files, ([u]) => set("apk_url", u)); }} /></F>
+          {apk && (
+            <div className="rounded-lg border border-glow/50 bg-muted/40 p-3 text-sm">
+              <div className="font-semibold text-glow">📦 APK detected{apk.isTvApp ? " · Fire TV ready" : ""}</div>
+              <div className="text-muted-foreground">{apk.packageName ?? "?"} · v{apk.versionName ?? "?"} (build {apk.versionCode ?? "?"}){apk.minSdk ? ` · Android SDK ${apk.minSdk}+` : ""}</div>
+              <div className="text-muted-foreground">Launches: {apk.launchActivity ?? "no launcher screen found"}</div>
+            </div>
+          )}
           <F label="…or external download URL"><Input value={d.apk_url ?? ""} placeholder="https://cdn.example.com/app.apk" onChange={(e) => set("apk_url", e.target.value || null)} /></F>
           <F label="File size label"><Input value={d.file_size ?? ""} placeholder="25 MB" onChange={(e) => set("file_size", e.target.value || null)} /></F>
         </div>
