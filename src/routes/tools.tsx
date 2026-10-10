@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import * as Icons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreGate } from "@/components/tv/StoreGate";
-import { adbConnect, adbDisconnect, adbShell, buildCommand, isNativeAdb, isValidHost } from "@/lib/adb-bridge";
+import { adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected, isNativeAdb, isValidHost, savedHost, saveHost } from "@/lib/adb-bridge";
 
 export const Route = createFileRoute("/tools")({
   head: () => ({
@@ -75,9 +75,22 @@ function Tools() {
         <div className="flex items-center gap-2 text-sm"><span className={`h-3 w-3 rounded-full ${dot}`} />{status === "on" ? "Connected" : status === "connecting" ? "Waiting for TV…" : "Disconnected"}</div>
         <div className="flex gap-2">
           <input data-nav inputMode="decimal" value={host} onChange={(e) => setHost(e.target.value)} placeholder="Firestick IP (Settings → My Fire TV → About → Network)" className="tv-focus flex-1 rounded-xl border border-border bg-card px-4 py-3" />
-          <button data-nav onClick={connect} className="tv-focus rounded-xl bg-primary px-5 font-bold text-primary-foreground">{status === "on" ? "Disconnect" : "Connect"}</button>
+          <button data-nav onClick={() => connect()} className="tv-focus rounded-xl bg-primary px-5 font-bold text-primary-foreground">{status === "on" ? "Disconnect" : "Connect"}</button>
         </div>
-        <p className="text-xs text-muted-foreground">Turn on ADB Debugging in Fire TV Settings → My Fire TV → Developer Options first.</p>
+        <button data-nav onClick={scan} disabled={scanning || status === "connecting"} className="tv-focus flex w-full items-center justify-center gap-2 rounded-xl border border-glow/50 py-3 font-bold text-glow disabled:opacity-50">
+          <Icons.Radar className="h-5 w-5" />{scanning ? "Scanning Wi-Fi…" : "Scan Wi-Fi for Firestick"}
+        </button>
+        {found && found.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {found.map((h) => (
+              <button data-nav key={h} onClick={() => connect(h)} className="tv-focus flex items-center gap-3 rounded-xl bg-card p-3 text-left">
+                <Icons.Tv className="h-6 w-6 text-primary" />
+                <span><span className="block font-bold">Fire TV</span><span className="text-sm text-muted-foreground">{h}{h === host && status === "on" ? " · connected" : ""}</span></span>
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">Turn on ADB Debugging in Fire TV Settings → My Fire TV → Developer Options first. Once connected, open any app in the store and tap "Send to Firestick".</p>
       </div>
 
       {actions.some((a) => a.needs_package) && (
