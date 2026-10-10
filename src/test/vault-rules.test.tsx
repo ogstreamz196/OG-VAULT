@@ -41,3 +41,13 @@ describe("spatial navigation", () => {
   it("moves down to the next row", () => expect(pickNext(from, [{ x: 120, y: 0, w: 100, h: 100 }, { x: 0, y: 200, w: 100, h: 100 }], "down")).toBe(1));
   it("returns -1 at an edge", () => expect(pickNext(from, [{ x: 120, y: 0, w: 100, h: 100 }], "left")).toBe(-1));
 });
+
+import { appsForCategory as afc } from "@/lib/access";
+describe("VIP section", () => {
+  const vipCat = { id: "v", is_vip: true }, media = { id: "m", is_vip: false };
+  const apps = [{ id: "1", category_id: "m", audiences: ["vip"] }, { id: "2", category_id: "m", audiences: ["free", "vip"] }];
+  it("VIP-only apps appear in the VIP section and their chosen category", () => {
+    expect(afc(apps, vipCat).map((a) => a.id)).toEqual(["1"]);
+    expect(afc(apps, media).map((a) => a.id)).toEqual(["1", "2"]);
+  });
+});

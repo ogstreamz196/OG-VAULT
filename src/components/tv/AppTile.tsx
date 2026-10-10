@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { tierFromAudiences } from "@/lib/access";
+import { canSeeApp, tierFromAudiences } from "@/lib/access";
+import { useAuth } from "@/hooks/use-auth";
+import { Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { AppRow } from "@/lib/catalog";
 import { installState, type InstallState } from "@/lib/installed";
@@ -8,6 +10,8 @@ import { AppIcon, TierBadge } from "./TvShell";
 export function AppTile({ app }: { app: AppRow }) {
   const [state, setState] = useState<InstallState>("none");
   useEffect(() => setState(installState(app)), [app]);
+  const { level } = useAuth();
+  const locked = !canSeeApp(level, app.audiences);
   const cat = (app as { categories?: { name: string } | null }).categories?.name;
   return (
     <Link data-nav to="/app/$id" params={{ id: app.id }} className="tv-focus glass group relative w-36 shrink-0 overflow-hidden rounded-2xl p-3 sm:w-56 sm:p-4">
@@ -17,7 +21,12 @@ export function AppTile({ app }: { app: AppRow }) {
           {state === "update" ? "UPDATE" : "INSTALLED"}
         </span>
       )}
-      <AppIcon title={app.title} url={app.icon_url} className="relative aspect-square w-full rounded-xl text-4xl shadow-lg" />
+      <div className="relative">
+        <AppIcon title={app.title} url={app.icon_url} className={`relative aspect-square w-full rounded-xl text-4xl shadow-lg ${locked ? "opacity-60" : ""}`} />
+        {locked && (
+          <span className="absolute inset-x-2 bottom-2 flex items-center justify-center gap-1.5 rounded-lg bg-vip/90 py-1 text-xs font-extrabold text-primary-foreground sm:text-sm"><Lock className="h-3.5 w-3.5" />VIP ONLY</span>
+        )}
+      </div>
       <div className="relative mt-3 flex items-center justify-between gap-2">
         <span className="min-w-0 truncate text-base font-semibold sm:text-lg">{app.title}</span>
         <TierBadge tier={tierFromAudiences(app.audiences)} />

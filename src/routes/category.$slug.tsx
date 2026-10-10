@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { catalogQuery } from "@/lib/catalog";
-import { isCategoryLocked } from "@/lib/access";
-import { useAuth } from "@/hooks/use-auth";
+import { appsForCategory } from "@/lib/access";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { StoreHeader } from "@/components/tv/StoreHeader";
-import { AppTile } from "@/components/tv/AppTile";
+import { useAuth } from "@/hooks/use-auth";
 import { VipLock } from "@/components/tv/VipLock";
+import { AppTile } from "@/components/tv/AppTile";
 
 export const Route = createFileRoute("/category/$slug")({
   head: () => ({
@@ -36,7 +36,7 @@ function CategoryBody() {
   const { isVip } = useAuth();
   const { data, isLoading } = useQuery(catalogQuery);
   const cat = data?.categories.find((c) => c.slug === slug);
-  const apps = data?.apps.filter((a) => a.category_id === cat?.id) ?? [];
+  const apps = data && cat ? appsForCategory(data.apps, cat) : [];
 
   return (
     <div className="pb-20">
@@ -49,9 +49,8 @@ function CategoryBody() {
         {cat && (
           <>
             <h1 className={`text-3xl sm:text-5xl font-extrabold ${cat.is_vip ? "text-vip" : ""}`}>{cat.name}</h1>
-            {isCategoryLocked(cat, isVip) ? (
-              <div className="pt-10"><VipLock title={cat.name} /></div>
-            ) : apps.length ? (
+            {cat.is_vip && !isVip && <div className="pt-8"><VipLock title={cat.name} /></div>}
+            {apps.length ? (
               <div className="flex flex-wrap gap-6 py-8">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
             ) : (
               <p className="pt-8 text-2xl text-muted-foreground">No apps here yet — check back soon.</p>
