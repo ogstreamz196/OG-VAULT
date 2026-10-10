@@ -18,19 +18,28 @@ export function usernameToEmail(raw: string): string {
 }
 
 export type Level = "none" | "guest" | "free" | "vip" | "admin";
-export const AUDIENCES = ["guest", "free", "vip"] as const;
+export const AUDIENCES = ["guest", "free", "vip", "boss"] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
-/** Guest = D.EV MODE Google sign-in, Free = username account, VIP = VIP member. The boss sees and installs everything. */
+const BROWSE: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["free", "vip"], guest: ["guest"] };
+const DOWNLOAD: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["free"], guest: ["guest"] };
+
+/** Boss sees all. VIP sees guest/free/vip. Free sees free + VIP (locked). Guest sees guest only. */
 export function canSeeApp(level: Level, audiences: string[]): boolean {
   if (level === "admin") return true;
-  if (level === "none") return false;
-  return audiences.includes(level);
+  return audiences.some((a) => (BROWSE[level] ?? []).includes(a));
+}
+
+/** Boss downloads all. VIP: guest/free/vip. Free: free only. Guest: guest only. */
+export function canDownloadApp(level: Level, audiences: string[]): boolean {
+  if (level === "admin") return true;
+  return audiences.some((a) => (DOWNLOAD[level] ?? []).includes(a));
 }
 
 /** Badge shown on an app: VIP when only VIP users can see it. */
 export function tierFromAudiences(audiences: string[]): "vip" | "free" {
-  return audiences.length > 0 && audiences.every((a) => a === "vip") ? "vip" : "free";
+  const a = audiences.filter((x) => x !== "boss");
+  return a.length > 0 && a.every((x) => x === "vip") ? "vip" : "free";
 }
 
 /** A VIP category is locked for anyone without VIP; other categories are always open. */

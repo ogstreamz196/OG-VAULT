@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { canSeeApp, tierFromAudiences } from "@/lib/access";
+import { canDownloadApp as canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";

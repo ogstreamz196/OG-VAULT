@@ -5,7 +5,7 @@ import * as Icons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { catalogQuery, type AppRow } from "@/lib/catalog";
-import { canSeeApp } from "@/lib/access";
+import { canDownloadApp as canSeeApp } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { logInstallEvent } from "@/lib/telemetry";
 import { adbInstall, adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected, isNativeAdb, isValidHost, savedHost, saveHost } from "@/lib/adb-bridge";

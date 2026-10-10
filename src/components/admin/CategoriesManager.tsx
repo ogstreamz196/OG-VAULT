@@ -63,7 +63,8 @@ export function CategoriesManager() {
               <span className="shrink-0 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs text-muted-foreground">{counts?.get(c.id) ?? 0} apps</span>
             </div>
             <div className="flex items-center gap-2">
-              <label className="mr-auto flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
+              <label className="flex items-center gap-2 whitespace-nowrap text-xs text-vip"><Switch checked={c.is_vip} onCheckedChange={(v) => toggleVip(c, v)} />VIP only</label>
+              <label className="mr-auto flex items-center gap-2 whitespace-nowrap text-xs text-glow"><Switch checked={c.is_boss} onCheckedChange={async (v) => { const { error } = await supabase.from("categories").update({ is_boss: v }).eq("id", c.id); if (error) toast.error(error.message); else refresh(); }} />Boss only</label>
               <Button variant="secondary" size="sm" disabled={i === 0} onClick={() => move(i, -1)}>↑</Button>
               <Button variant="secondary" size="sm" disabled={i === data.length - 1} onClick={() => move(i, 1)}>↓</Button>
               <Button variant="destructive" size="sm" onClick={() => remove(c)}>Remove</Button>

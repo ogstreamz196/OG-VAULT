@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AppIcon } from "@/components/tv/TvShell";
 import { AUDIENCES, tierFromAudiences } from "@/lib/access";
 
-const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: "VIP" } as const;
+const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: "VIP", boss: "Boss only" } as const;
 
 type Draft = TablesInsert<"apps">;
 const empty: Draft = { title: "", package_name: "", version: "1.0.0", build_number: 1, description: "", changelog: "", tier: "free", audiences: ["free", "vip"], is_active: true, is_featured: false, category_id: null, icon_url: null, banner_url: null, screenshots: [], apk_url: null, file_size: null };
