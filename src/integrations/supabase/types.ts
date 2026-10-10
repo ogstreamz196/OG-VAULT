@@ -130,6 +130,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_boss: boolean
           is_vip: boolean
           name: string
           slug: string
@@ -138,6 +139,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_boss?: boolean
           is_vip?: boolean
           name: string
           slug: string
@@ -146,6 +148,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_boss?: boolean
           is_vip?: boolean
           name?: string
           slug?: string
@@ -478,6 +481,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_browse_app: {
+        Args: { _audiences: string[]; _category_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
