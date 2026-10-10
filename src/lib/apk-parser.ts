@@ -53,7 +53,7 @@ async function extract(file: File, e: Entry): Promise<Uint8Array> {
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-const ATTR = { versionCode: 0x0101021b, versionName: 0x0101021c, label: 0x01010001, icon: 0x01010002, name: 0x01010003, minSdk: 0x0101020c, targetSdk: 0x01010270 };
+const ATTR = { versionCode: 0x0101021b, versionName: 0x0101021c, label: 0x01010001, icon: 0x01010002, name: 0x01010003, minSdk: 0x0101020c, targetSdk: 0x01010270, enabled: 0x0101000e };
 
 type Attr = { name: string; resId: number; str: string | null; num: number; type: number };
 type El = { name: string; attrs: Attr[]; start: boolean };
@@ -134,7 +134,7 @@ export function readManifest(events: El[]) {
     } else if (el.name === "application") {
       const l = attr(el, "label"); info.label = l?.str ?? null;
     } else if (el.name === "activity" || el.name === "activity-alias") {
-      current = attr(el, "name")?.str ?? null; activityDepth = depth; hasMain = false; hasLauncher = false;
+      const en = attr(el, "enabled"); current = en && en.type === 0x12 && en.num === 0 ? null : attr(el, "name")?.str ?? null; activityDepth = depth; hasMain = false; hasLauncher = false;
     } else if (current && el.name === "action" && attr(el, "name")?.str === "android.intent.action.MAIN") hasMain = true;
     else if (current && el.name === "category") {
       const c = attr(el, "name")?.str;
@@ -161,7 +161,7 @@ export async function inspectApk(file: File): Promise<ApkInfo> {
     try {
       const data = await extract(file, icons[0]);
       const ext = icons[0].name.endsWith(".webp") ? "webp" : "png";
-      icon = new File([data], `${info.packageName ?? "icon"}.${ext}`, { type: `image/${ext}` });
+      icon = new File([new Uint8Array(data)], `${info.packageName ?? "icon"}.${ext}`, { type: `image/${ext}` });
     } catch { /* icon is optional */ }
   }
   return { ...info, icon };
