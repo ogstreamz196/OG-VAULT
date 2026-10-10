@@ -27,6 +27,7 @@
 - Phone ADB tools: `/tools` runs admin-defined `remote_actions` via `src/lib/adb-bridge.ts` (native AdbBridge plugin if present, else simulator) — buttons are data, not code.
 - The android/ Capacitor project is committed pre-configured (AdbBridge plugin registered, dadb dependency, leanback + touch optional, Fire TV banner) so the user only syncs/builds in Android Studio; native/android/AdbBridgePlugin.java is the master copy and must match the android/ copy.
 - Fire TV launcher banners are packaged as native drawable resources in baseline and xhdpi sizes and referenced by both the application and launcher activity — the home screen must work without fetching CDN artwork.
+- All launcher icons (legacy + adaptive foreground), splash screens, favicon and PWA icon are generated from the user's supplied vault artwork: legacy icons full-bleed on black, adaptive foregrounds inside the 66/108 safe zone with black artwork pixels made transparent (tile color #040714), splashes screen-blended over #040714 — no cropping of the artwork.
 - The native app's server.url points at the published custom domain — the preview URL is private and returns 401 on devices.
 - Boss Controls are web-only: the header link and `/admin` are hidden/blocked when `isNative()` is true — the boss manages the store from a browser, never from the APK.
 - Store-wide announcement is the single-row `store_broadcast` table (public read, admin write), rendered by `BroadcastBar` under `StoreHeader`.
