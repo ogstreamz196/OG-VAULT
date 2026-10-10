@@ -16,5 +16,8 @@ Only rebuild after changing `capacitor.config.ts` or native code (`npx cap sync 
 The Fire TV launcher uses `@drawable/tv_banner` on both the application and
 launcher activity. Its 320×180 and 640×360 resources preserve the complete
 supplied 16:9 artwork; these must remain real Android resources, not CDN links.
+The app icon (`ic_launcher`, adaptive foreground) and every `splash.png` are
+also generated from the same supplied artwork — the adaptive tile background
+is `#040714`.
 After changing launcher artwork, rebuild and install the APK. Fire TV may cache
 the old tile; restart the stick if it remains visible.
