@@ -37,7 +37,7 @@ Key Features:
    - M3U Verification Settings: Configurable M3U/Xtream validation rules.
 
 3. Capacitor & Firestick Readiness:
-   - Include capacitor.config.ts configured for package name com.ogstreamz.ogvault and app name "OG VAULT".
+   - Include capacitor.config.ts configured for package name og.vault and app name "OG VAULT".
    - Helper utility to trigger native download and package installation intent when running in Capacitor.
 
 This project was built with [Lovable](https://lovable.dev).
