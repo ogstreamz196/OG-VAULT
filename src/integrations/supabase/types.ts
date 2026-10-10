@@ -204,6 +204,48 @@ export type Database = {
         }
         Relationships: []
       }
+      remote_actions: {
+        Row: {
+          audiences: string[]
+          command: string
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          is_active: boolean
+          label: string
+          needs_confirmation: boolean
+          needs_package: boolean
+          sort_order: number
+        }
+        Insert: {
+          audiences?: string[]
+          command: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          needs_confirmation?: boolean
+          needs_package?: boolean
+          sort_order?: number
+        }
+        Update: {
+          audiences?: string[]
+          command?: string
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          needs_confirmation?: boolean
+          needs_package?: boolean
+          sort_order?: number
+        }
+        Relationships: []
+      }
       storage_settings: {
         Row: {
           access_key_id: string | null
