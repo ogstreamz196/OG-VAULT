@@ -96,9 +96,9 @@ function readPool(v: DataView, buf: Uint8Array, p: number, hsize: number): strin
   for (let i = 0; i < count; i++) {
     let s = p + strStart + v.getUint32(p + hsize + i * 4, true);
     if (utf8) {
-      s += buf[s] & 0x80 ? 2 : 1;
-      let len = buf[s];
-      if (len & 0x80) { len = ((len & 0x7f) << 8) | buf[s + 1]; s += 2; } else s += 1;
+      s += (buf[s] ?? 0) & 0x80 ? 2 : 1;
+      let len = buf[s] ?? 0;
+      if (len & 0x80) { len = ((len & 0x7f) << 8) | (buf[s + 1] ?? 0); s += 2; } else s += 1;
       out.push(dec8.decode(buf.subarray(s, s + len)));
     } else {
       let len = v.getUint16(s, true);

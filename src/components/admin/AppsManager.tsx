@@ -89,9 +89,9 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
       setApk(info);
       setD((p) => ({
         ...p,
-        package_name: info.packageName ?? p.package_name,
-        version: info.versionName ?? p.version,
-        build_number: info.versionCode ?? p.build_number,
+        package_name: info.packageName ?? p.package_name ?? "",
+        version: info.versionName ?? p.version ?? "1.0.0",
+        build_number: info.versionCode ?? p.build_number ?? 1,
         title: p.title?.trim() ? p.title : info.label && !info.label.startsWith("@") ? info.label : p.title,
       }));
       toast.success(`Detected ${info.packageName ?? "app"} v${info.versionName ?? "?"}`);
