@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canSeeApp, tierFromAudiences, generateVipCode, isCategoryLocked, usernameError, usernameToEmail, VIP_CODE_PATTERN } from "@/lib/access";
+import { canSeeApp, canDownloadApp, tierFromAudiences, generateVipCode, isCategoryLocked, usernameError, usernameToEmail, VIP_CODE_PATTERN } from "@/lib/access";
 import { pickNext } from "@/lib/spatial-nav";
 
 describe("app audiences", () => {
@@ -7,8 +7,18 @@ describe("app audiences", () => {
     expect(canSeeApp("guest", ["guest"])).toBe(true);
     expect(canSeeApp("guest", ["free", "vip"])).toBe(false);
   });
-  it("free members cannot see VIP-only apps", () => expect(canSeeApp("free", ["vip"])).toBe(false));
-  it("VIP members see VIP apps", () => expect(canSeeApp("vip", ["vip"])).toBe(true));
+  it("free members see VIP apps but cannot download them", () => {
+    expect(canSeeApp("free", ["vip"])).toBe(true);
+    expect(canDownloadApp("free", ["vip"])).toBe(false);
+  });
+  it("free members cannot see guest-only apps", () => expect(canSeeApp("free", ["guest"])).toBe(false));
+  it("VIP members download VIP, free and guest apps", () => {
+    for (const a of ["vip", "free", "guest"]) expect(canDownloadApp("vip", [a])).toBe(true);
+  });
+  it("only the boss sees boss-only apps", () => {
+    expect(canSeeApp("vip", ["boss"])).toBe(false);
+    expect(canDownloadApp("admin", ["boss"])).toBe(true);
+  });
   it("the boss sees everything", () => expect(canSeeApp("admin", [])).toBe(true));
   it("signed-out viewers see nothing", () => expect(canSeeApp("none", ["guest", "free", "vip"])).toBe(false));
   it("VIP-only apps get the VIP badge", () => {
