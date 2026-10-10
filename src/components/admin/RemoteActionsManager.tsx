@@ -17,17 +17,17 @@ export function RemoteActionsManager() {
   const refresh = () => { qc.invalidateQueries({ queryKey: ["admin-remote"] }); qc.invalidateQueries({ queryKey: ["remote-actions"] }); };
 
   async function save() {
-    if (!form.label.trim() || !form.command.trim()) return toast.error("Label and command are required");
-    if (!form.audiences.length) return toast.error("Pick at least one audience");
+    if (!form.label.trim() || !form.command.trim()) { toast.error("Label and command are required"); return; }
+    if (!form.audiences.length) { toast.error("Pick at least one audience"); return; }
     const row = { ...form, command: form.command.trim(), needs_package: form.command.includes("{package}") };
     const { error } = editId
       ? await supabase.from("remote_actions").update(row).eq("id", editId)
       : await supabase.from("remote_actions").insert({ ...row, sort_order: (data.at(-1)?.sort_order ?? 0) + 1 });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(editId ? "Button updated" : "Button added");
     setForm(empty); setEditId(null); refresh();
   }
-  async function patch(id: string, p: Record<string, unknown>) {
+  async function patch(id: string, p: { is_active?: boolean; sort_order?: number }) {
     const { error } = await supabase.from("remote_actions").update(p).eq("id", id);
     if (error) toast.error(error.message); else refresh();
   }
