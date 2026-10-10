@@ -7,3 +7,5 @@
 - [x] Boss admin = ogstreamz196@gmail.com via Google; "Boss Control Panel" in store menu
 - [x] Replace store login with username + password accounts
 - [x] Show all categories incl. OG VIP ACCESS (locked for non-VIP, open for VIP) + category pages
+- [x] Phone Firestick Remote Tools + boss-managed custom buttons
+- [x] Native AdbBridge plugin source (native/android) — needs building into the Android phone APK
