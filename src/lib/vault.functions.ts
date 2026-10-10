@@ -86,17 +86,25 @@ export const vaultSignIn = createServerFn({ method: "POST" })
     const email = `${local}@users.ogvault.app`;
     const authPw = await hmacHex(secret, `auth:${email}`);
 
+    let userId: string | null = null;
     const { data: prof } = await supabaseAdmin.from("profiles").select("id").eq("username", local).maybeSingle();
     if (prof) {
+      userId = prof.id;
       await supabaseAdmin.auth.admin.updateUserById(prof.id, { password: authPw });
     } else {
-      const { error } = await supabaseAdmin.auth.admin.createUser({ email, password: authPw, email_confirm: true, user_metadata: { username: local } });
+      const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email, password: authPw, email_confirm: true, user_metadata: { username: local } });
       if (error && !/already/i.test(error.message)) return { ok: false as const, error: "Could not open your account" };
+      userId = created?.user?.id ?? null;
       if (error) {
         const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
         const u = list?.users.find((x) => x.email === email);
-        if (u) await supabaseAdmin.auth.admin.updateUserById(u.id, { password: authPw });
+        if (u) { userId = u.id; await supabaseAdmin.auth.admin.updateUserById(u.id, { password: authPw }); }
       }
+    }
+    // Every active OG Vault pass holder is a VIP.
+    if (userId) {
+      const { error: vipErr } = await supabaseAdmin.from("vip_members").upsert({ user_id: userId, expires_at: null, code_id: null }, { onConflict: "user_id" });
+      if (vipErr) console.error("[vault] vip grant failed", vipErr.message);
     }
     return { ok: true as const, email, token: authPw };
   });

@@ -148,21 +148,110 @@ export function readManifest(events: El[]) {
   return info;
 }
 
+type ResVal = { type: number; value: number; density: number; str: string | null };
+
+/** Looks up every config value of a resource id in resources.arsc. */
+export function lookupRes(buf: Uint8Array, resId: number): ResVal[] {
+  const v = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+  const out: ResVal[] = [];
+  let global: string[] = [];
+  const pkgId = resId >>> 24, typeId = (resId >>> 16) & 0xff, idx = resId & 0xffff;
+  let p = v.getUint16(2, true);
+  while (p + 8 <= buf.length) {
+    const t = v.getUint16(p, true), h = v.getUint16(p + 2, true), sz = v.getUint32(p + 4, true);
+    if (!sz) break;
+    if (t === 0x0001) global = readPool(v, buf, p, h);
+    else if (t === 0x0200 && v.getUint32(p + 8, true) === pkgId) {
+      let q = p + h;
+      const end = p + sz;
+      while (q + 8 <= end) {
+        const tt = v.getUint16(q, true), th = v.getUint16(q + 2, true), ts = v.getUint32(q + 4, true);
+        if (!ts) break;
+        if (tt === 0x0201 && v.getUint8(q + 8) === typeId) {
+          const flags = v.getUint8(q + 9), count = v.getUint32(q + 12, true), entriesStart = v.getUint32(q + 16, true);
+          const density = v.getUint16(q + 20 + 14, true);
+          let off = -1;
+          if (flags & 1) {
+            for (let i = 0; i < count; i++) { const e = q + th + i * 4; if (v.getUint16(e, true) === idx) { off = v.getUint16(e + 2, true) * 4; break; } }
+          } else if (idx < count) {
+            if (flags & 2) { const o = v.getUint16(q + th + idx * 2, true); off = o === 0xffff ? -1 : o * 4; }
+            else { const o = v.getUint32(q + th + idx * 4, true); off = o === 0xffffffff ? -1 : o; }
+          }
+          if (off >= 0) {
+            const e = q + entriesStart + off;
+            const ef = v.getUint16(e + 2, true);
+            let dt: number | null = null, data = 0;
+            if (ef & 0x8) { dt = ef >> 8; data = v.getUint32(e + 4, true); }
+            else if (!(ef & 1)) { dt = v.getUint8(e + 11); data = v.getUint32(e + 12, true); }
+            if (dt !== null) out.push({ type: dt, value: data, density, str: dt === 0x03 ? global[data] ?? null : null });
+          }
+        }
+        q += ts;
+      }
+    }
+    p += sz;
+  }
+  return out;
+}
+
+const densRank = (d: number) => (d === 0xffff || d === 0xfffe ? -1 : d === 0 ? 1 : d);
+
+async function resolveIcon(file: File, entries: Entry[], arsc: Uint8Array, resId: number, name: string, depth = 0): Promise<File | null> {
+  if (depth > 3 || !resId) return null;
+  const vals = lookupRes(arsc, resId).sort((a, b) => densRank(b.density) - densRank(a.density));
+  for (const val of vals) {
+    if (val.str && /\.(png|webp)$/i.test(val.str)) {
+      const e = entries.find((x) => x.name === val.str);
+      if (!e) continue;
+      const ext = val.str.toLowerCase().endsWith(".webp") ? "webp" : "png";
+      return new File([new Uint8Array(await extract(file, e))], `${name}.${ext}`, { type: `image/${ext}` });
+    }
+  }
+  for (const val of vals) {
+    if (val.type === 0x01) { const r = await resolveIcon(file, entries, arsc, val.value, name, depth + 1); if (r) return r; }
+  }
+  for (const val of vals) {
+    if (val.str && val.str.endsWith(".xml")) {
+      const e = entries.find((x) => x.name === val.str);
+      if (!e) continue;
+      // Adaptive icon: follow its layers, foreground first.
+      const refs = parseAxml(await extract(file, e)).flatMap((el) => el.attrs.filter((a) => a.type === 0x01).map((a) => ({ a, el: el.name })));
+      refs.sort((x, y) => Number(y.el === "foreground") - Number(x.el === "foreground"));
+      for (const { a } of refs) { const r = await resolveIcon(file, entries, arsc, a.num, name, depth + 1); if (r) return r; }
+    }
+  }
+  return null;
+}
+
+function iconResId(events: El[]): number {
+  const app = events.find((e) => e.start && e.name === "application");
+  const a = app?.attrs.find((x) => x.resId === ATTR.icon || x.name === "icon");
+  return a && a.type === 0x01 ? a.num : 0;
+}
+
 export async function inspectApk(file: File): Promise<ApkInfo> {
   const entries = await readEntries(file);
   const manifest = entries.find((e) => e.name === "AndroidManifest.xml");
   if (!manifest) throw new Error("AndroidManifest.xml not found in APK");
-  const info = readManifest(parseAxml(await extract(file, manifest)));
+  const events = parseAxml(await extract(file, manifest));
+  const info = readManifest(events);
+  const name = info.packageName ?? "icon";
   let icon: File | null = null;
-  const icons = entries
-    .filter((e) => /^res\/(mipmap|drawable)[^/]*\/(ic_launcher|app_icon|icon|ic_banner|banner)[^/]*\.(png|webp)$/i.test(e.name) && !/round|foreground|background/i.test(e.name))
-    .sort((a, b) => b.size - a.size);
-  if (icons[0]) {
-    try {
-      const data = await extract(file, icons[0]);
-      const ext = icons[0].name.endsWith(".webp") ? "webp" : "png";
-      icon = new File([new Uint8Array(data)], `${info.packageName ?? "icon"}.${ext}`, { type: `image/${ext}` });
-    } catch { /* icon is optional */ }
+  try {
+    const arscEntry = entries.find((e) => e.name === "resources.arsc");
+    const resId = iconResId(events);
+    if (arscEntry && resId) icon = await resolveIcon(file, entries, await extract(file, arscEntry), resId, name);
+  } catch { /* fall back below */ }
+  if (!icon) {
+    const icons = entries
+      .filter((e) => /^res\/(mipmap|drawable)[^/]*\/(ic_launcher|app_icon|icon|ic_banner|banner)[^/]*\.(png|webp)$/i.test(e.name) && !/round|foreground|background/i.test(e.name))
+      .sort((a, b) => b.size - a.size);
+    if (icons[0]) {
+      try {
+        const ext = icons[0].name.endsWith(".webp") ? "webp" : "png";
+        icon = new File([new Uint8Array(await extract(file, icons[0]))], `${name}.${ext}`, { type: `image/${ext}` });
+      } catch { /* icon is optional */ }
+    }
   }
   return { ...info, icon };
 }

@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateStoreCopy } from "@/lib/ai-copy.functions";
+import { researchApp } from "@/lib/ai-research.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia, type AppRow, type CategoryRow } from "@/lib/catalog";
 import { inspectApk, type ApkInfo } from "@/lib/apk-parser";
@@ -109,23 +110,41 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
     } finally { setBusy(null); }
   }
 
+  const research = useServerFn(researchApp);
+  async function searchWeb(title: string, packageName: string, silent = false) {
+    if (!title.trim() && !packageName.trim()) { if (!silent) toast.error("Add a title or pick an APK first"); return; }
+    setBusy("Searching the web for this app…");
+    try {
+      const r = await research({ data: { title, packageName } });
+      if ("error" in r && r.error) { toast.error(r.error); return; }
+      if ("description" in r && r.description) {
+        setD((p) => ({ ...p, description: r.description, title: p.title?.trim() ? p.title : r.title || p.title }));
+        if (r.features) setFeatures(r.features);
+        toast.success("Description found online — review before saving");
+      }
+    } catch { toast.error("Web search failed"); }
+    finally { setBusy(null); }
+  }
+
   const [apk, setApk] = useState<Omit<ApkInfo, "icon"> | null>(null);
   async function detect(file?: File) {
     if (!file) return;
     try {
       const info = await inspectApk(file);
       setApk(info);
+      const label = info.label && !info.label.startsWith("@") ? info.label : "";
       setD((p) => ({
         ...p,
         package_name: info.packageName ?? p.package_name ?? "",
         version: info.versionName ?? p.version ?? "1.0.0",
         build_number: info.versionCode ?? p.build_number ?? 1,
-        title: p.title?.trim() ? p.title : info.label && !info.label.startsWith("@") ? info.label : p.title,
+        title: p.title?.trim() ? p.title : label || p.title,
       }));
       toast.success(`Detected ${info.packageName ?? "app"} v${info.versionName ?? "?"}`);
-      if (info.icon && !d.icon_url) {
-        try { const u = await uploadMedia("app-media", info.icon); set("icon_url", u); } catch { /* optional */ }
-      }
+      if (info.icon) {
+        try { const u = await uploadMedia("app-media", info.icon); set("icon_url", u); toast.success("App logo taken from the APK"); } catch { /* optional */ }
+      } else toast.message("No logo found inside this APK — upload one manually");
+      if (!d.description?.trim()) void searchWeb(d.title?.trim() || label, info.packageName ?? "", true);
     } catch (e) {
       toast.error(`Couldn't read APK details: ${e instanceof Error ? e.message : "unknown"} — fill them in manually`);
     }
@@ -194,7 +213,10 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
           <h3 className="font-semibold">✨ AI writer (Groq)</h3>
           <F label="Key features (one per line)"><Textarea rows={3} value={features} placeholder={"4K playback\nNo buffering\nRemote friendly"} onChange={(e) => setFeatures(e.target.value)} /></F>
           <p className="text-xs text-muted-foreground">Uses the title, category and changelog below. Results replace the Description and Changelog — review before saving.</p>
-          <Button type="button" variant="secondary" disabled={!!busy} onClick={generate}>Generate description & release notes</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="secondary" disabled={!!busy} onClick={() => searchWeb(d.title, d.package_name ?? "")}>🔎 Search web for this app</Button>
+            <Button type="button" variant="secondary" disabled={!!busy} onClick={generate}>Generate description & release notes</Button>
+          </div>
         </div>
         <F label="Description"><Textarea rows={4} value={d.description ?? ""} onChange={(e) => set("description", e.target.value)} /></F>
         <F label="Changelog"><Textarea rows={3} value={d.changelog ?? ""} onChange={(e) => set("changelog", e.target.value)} /></F>
