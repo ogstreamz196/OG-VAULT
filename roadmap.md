@@ -9,3 +9,5 @@
 - [x] Show all categories incl. OG VIP ACCESS (locked for non-VIP, open for VIP) + category pages
 - [x] Phone Firestick Remote Tools + boss-managed custom buttons
 - [x] Native AdbBridge plugin source (native/android) — needs building into the Android phone APK
+- [x] Push to Firestick (phone ADB install) + Wi-Fi auto-scan
+- [x] TV search, Updates page, Open App / Manage in Settings

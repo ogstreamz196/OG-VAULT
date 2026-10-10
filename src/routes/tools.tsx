@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import * as Icons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreGate } from "@/components/tv/StoreGate";
-import { adbConnect, adbDisconnect, adbShell, buildCommand, isNativeAdb, isValidHost } from "@/lib/adb-bridge";
+import { adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected, isNativeAdb, isValidHost, savedHost, saveHost } from "@/lib/adb-bridge";
 
 export const Route = createFileRoute("/tools")({
   head: () => ({
@@ -30,16 +30,25 @@ function Tools() {
   const [packages, setPackages] = useState<string[]>([]);
   const [log, setLog] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
-  useEffect(() => { setHost(localStorage.getItem("ogvault.adbHost") ?? ""); }, []);
+  const [found, setFound] = useState<string[] | null>(null);
+  const [scanning, setScanning] = useState(false);
+  useEffect(() => { setHost(savedHost()); if (isConnected()) setStatus("on"); }, []);
   const push = (s: string) => setLog((l) => [s, ...l].slice(0, 30));
 
-  async function connect() {
-    if (status === "on") { await adbDisconnect(); setStatus("off"); return; }
-    if (!isValidHost(host)) return push("Enter your Firestick IP, e.g. 192.168.1.45");
+  async function scan() {
+    setScanning(true); setFound(null); push("Scanning your Wi-Fi for Firesticks…");
+    try { const h = await adbScan(); setFound(h); push(h.length ? `Found ${h.length} device(s)` : "No Firesticks found — is ADB Debugging on?"); }
+    catch (e) { push(`Scan failed: ${(e as Error).message}`); } finally { setScanning(false); }
+  }
+
+  async function connect(target = host) {
+    if (status === "on" && target === host) { await adbDisconnect(); setStatus("off"); return; }
+    if (!isValidHost(target)) return push("Enter your Firestick IP, e.g. 192.168.1.45");
+    setHost(target);
     setStatus("connecting"); push("Connecting… accept 'Allow USB debugging' on your TV.");
     try {
-      if (!(await adbConnect(host, 5555))) throw new Error("Connection refused");
-      localStorage.setItem("ogvault.adbHost", host); setStatus("on"); push(`Connected to ${host}`);
+      if (!(await adbConnect(target, 5555))) throw new Error("Connection refused");
+      saveHost(target); setStatus("on"); push(`Connected to ${target}`);
       const out = await adbShell("pm list packages -3");
       setPackages(out.split("\n").map((l) => l.replace(/^.*package:/, "").trim()).filter(Boolean));
     } catch (e) { setStatus("off"); push(`Failed: ${(e as Error).message}`); }
@@ -66,9 +75,22 @@ function Tools() {
         <div className="flex items-center gap-2 text-sm"><span className={`h-3 w-3 rounded-full ${dot}`} />{status === "on" ? "Connected" : status === "connecting" ? "Waiting for TV…" : "Disconnected"}</div>
         <div className="flex gap-2">
           <input data-nav inputMode="decimal" value={host} onChange={(e) => setHost(e.target.value)} placeholder="Firestick IP (Settings → My Fire TV → About → Network)" className="tv-focus flex-1 rounded-xl border border-border bg-card px-4 py-3" />
-          <button data-nav onClick={connect} className="tv-focus rounded-xl bg-primary px-5 font-bold text-primary-foreground">{status === "on" ? "Disconnect" : "Connect"}</button>
+          <button data-nav onClick={() => connect()} className="tv-focus rounded-xl bg-primary px-5 font-bold text-primary-foreground">{status === "on" ? "Disconnect" : "Connect"}</button>
         </div>
-        <p className="text-xs text-muted-foreground">Turn on ADB Debugging in Fire TV Settings → My Fire TV → Developer Options first.</p>
+        <button data-nav onClick={scan} disabled={scanning || status === "connecting"} className="tv-focus flex w-full items-center justify-center gap-2 rounded-xl border border-glow/50 py-3 font-bold text-glow disabled:opacity-50">
+          <Icons.Radar className="h-5 w-5" />{scanning ? "Scanning Wi-Fi…" : "Scan Wi-Fi for Firestick"}
+        </button>
+        {found && found.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {found.map((h) => (
+              <button data-nav key={h} onClick={() => connect(h)} className="tv-focus flex items-center gap-3 rounded-xl bg-card p-3 text-left">
+                <Icons.Tv className="h-6 w-6 text-primary" />
+                <span><span className="block font-bold">Fire TV</span><span className="text-sm text-muted-foreground">{h}{h === host && status === "on" ? " · connected" : ""}</span></span>
+              </button>
+            ))}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">Turn on ADB Debugging in Fire TV Settings → My Fire TV → Developer Options first. Once connected, open any app in the store and tap "Send to Firestick".</p>
       </div>
 
       {actions.some((a) => a.needs_package) && (
