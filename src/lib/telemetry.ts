@@ -12,7 +12,7 @@ export function logInstallEvent(appId: string, userId: string | undefined, event
     .then(({ error: e }) => { if (e) console.warn("telemetry", e.message); }, () => {});
 }
 
-export type EventRow = { app_id: string; event_type: string; created_at: string; error_message: string | null };
+export type EventRow = { app_id: string; event_type: string; created_at: string; error_message: string | null; platform?: string };
 
 export type AppStats = { appId: string; downloads: number; completed: number; installs: number; failures: number; failureRate: number; lastError: string | null };
 

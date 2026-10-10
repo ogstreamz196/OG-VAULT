@@ -11,6 +11,8 @@ import { OgVaultPassSyncCard } from "@/components/admin/OgVaultPassSyncCard";
 import { R2StorageCard } from "@/components/admin/R2StorageCard";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { RemoteActionsManager } from "@/components/admin/RemoteActionsManager";
+import { BroadcastCard } from "@/components/admin/BroadcastCard";
+import { isNative } from "@/lib/native-install";
 
 export const Route = createFileRoute("/admin")({
   ssr: false,
@@ -31,6 +33,14 @@ export const Route = createFileRoute("/admin")({
 function AdminPage() {
   const { ready, user, isAdmin, username, signOut } = useAuth();
   if (!ready) return <div className="min-h-screen" />;
+  if (isNative())
+    return (
+      <div className="mx-auto max-w-md space-y-4 p-10 text-center">
+        <h1 className="text-2xl font-bold">Boss Controls are web only</h1>
+        <p className="text-muted-foreground">Open vault.ogstreamz.co.uk/admin in a web browser to manage the store.</p>
+        <Button asChild><Link to="/">Go to store</Link></Button>
+      </div>
+    );
   if (!user || !isAdmin)
     return (
       <div className="mx-auto max-w-md space-y-4 p-10 text-center">
@@ -60,7 +70,7 @@ function AdminPage() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="remote">Remote Tools</TabsTrigger>
           </TabsList>
-          <TabsContent value="apps" className="space-y-6"><R2StorageCard /><AppsManager /></TabsContent>
+          <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
           <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /><VipManager /></TabsContent>
           <TabsContent value="members"><MembersManager /></TabsContent>

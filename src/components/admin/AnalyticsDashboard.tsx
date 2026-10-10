@@ -18,7 +18,7 @@ export function AnalyticsDashboard() {
     queryKey: ["admin", "install-events", range],
     refetchInterval: 60_000,
     queryFn: async () => {
-      let q = supabase.from("app_install_events").select("app_id,event_type,created_at,error_message").order("created_at", { ascending: false }).limit(20000);
+      let q = supabase.from("app_install_events").select("app_id,event_type,created_at,error_message,platform").order("created_at", { ascending: false }).limit(20000);
       const days = RANGES[range];
       if (days) q = q.gte("created_at", new Date(Date.now() - days * 864e5).toISOString());
       const { data, error } = await q;
@@ -46,6 +46,8 @@ export function AnalyticsDashboard() {
   }, [rows]);
   const max = Math.max(1, ...daily.map(([, v]) => v.d));
   const tot = stats.reduce((a, s) => ({ d: a.d + s.downloads, i: a.i + s.installs, f: a.f + s.failures }), { d: 0, i: 0, f: 0 });
+  const starts = rows.filter((r) => r.event_type === "download_started");
+  const stick = starts.filter((r) => r.platform === "firestick").length;
   const title = (id: string) => apps.data?.find((a) => a.id === id)?.title ?? "Deleted app";
 
   return (
@@ -61,6 +63,17 @@ export function AnalyticsDashboard() {
           <Card key={k}><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{k}</CardTitle></CardHeader><CardContent className="text-3xl font-bold">{v}</CardContent></Card>
         ))}
       </div>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle>Where downloads come from</CardTitle></CardHeader>
+        <CardContent>
+          {starts.length === 0 ? <p className="text-muted-foreground">No downloads yet.</p> : (
+            <>
+              <div className="flex h-4 overflow-hidden rounded-full bg-secondary"><div className="bg-primary" style={{ width: `${(stick / starts.length) * 100}%` }} /></div>
+              <div className="mt-2 flex justify-between text-sm"><span className="text-primary">Firestick / app: {stick} ({Math.round((stick / starts.length) * 100)}%)</span><span className="text-muted-foreground">Web browser: {starts.length - stick} ({Math.round(((starts.length - stick) / starts.length) * 100)}%)</span></div>
+            </>
+          )}
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader><CardTitle>Downloads per day</CardTitle></CardHeader>
         <CardContent>
