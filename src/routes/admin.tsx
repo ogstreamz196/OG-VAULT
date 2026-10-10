@@ -31,6 +31,14 @@ export const Route = createFileRoute("/admin")({
 function AdminPage() {
   const { ready, user, isAdmin, username, signOut } = useAuth();
   if (!ready) return <div className="min-h-screen" />;
+  if (isNative())
+    return (
+      <div className="mx-auto max-w-md space-y-4 p-10 text-center">
+        <h1 className="text-2xl font-bold">Boss Controls are web only</h1>
+        <p className="text-muted-foreground">Open vault.ogstreamz.co.uk/admin in a web browser to manage the store.</p>
+        <Button asChild><Link to="/">Go to store</Link></Button>
+      </div>
+    );
   if (!user || !isAdmin)
     return (
       <div className="mx-auto max-w-md space-y-4 p-10 text-center">
