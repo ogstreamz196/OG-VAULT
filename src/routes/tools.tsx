@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import * as Icons from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { StoreGate } from "@/components/tv/StoreGate";
-import { adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected, isNativeAdb, isValidHost, savedHost, saveHost } from "@/lib/adb-bridge";
+import { catalogQuery, type AppRow } from "@/lib/catalog";
+import { canSeeApp } from "@/lib/access";
+import { useAuth } from "@/hooks/use-auth";
+import { logInstallEvent } from "@/lib/telemetry";
+import { adbInstall, adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected, isNativeAdb, isValidHost, savedHost, saveHost } from "@/lib/adb-bridge";
 
 export const Route = createFileRoute("/tools")({
   head: () => ({
@@ -32,6 +36,26 @@ function Tools() {
   const [busy, setBusy] = useState<string | null>(null);
   const [found, setFound] = useState<string[] | null>(null);
   const [scanning, setScanning] = useState(false);
+  const { level, user } = useAuth();
+  const { data: catalog } = useQuery(catalogQuery);
+  const sendable = (catalog?.apps ?? []).filter((a) => a.apk_url && canSeeApp(level, a.audiences));
+  const [sendId, setSendId] = useState("");
+  const [sendPct, setSendPct] = useState<{ stage: string; pct: number } | null>(null);
+  async function send(app: AppRow | undefined) {
+    if (!app?.apk_url) return push("Pick an app to send first.");
+    if (status !== "on") return push("Connect your Firestick first.");
+    logInstallEvent(app.id, user?.id, "download_started");
+    try {
+      setSendPct({ stage: "Downloading to phone", pct: 0 });
+      const out = await adbInstall(app.apk_url, (stage, pct) => setSendPct({ stage: stage === "download" ? "Downloading to phone" : "Sending to Firestick", pct }));
+      if (!/success/i.test(out)) throw new Error(out || "Install failed");
+      logInstallEvent(app.id, user?.id, "install_prompted");
+      push(`${app.title} installed on your Firestick ✓`);
+    } catch (e) {
+      logInstallEvent(app.id, user?.id, "install_failed", (e as Error).message);
+      push(`Send failed: ${(e as Error).message}`);
+    } finally { setSendPct(null); }
+  }
   useEffect(() => { setHost(savedHost()); if (isConnected()) setStatus("on"); }, []);
   const push = (s: string) => setLog((l) => [s, ...l].slice(0, 30));
 
@@ -91,6 +115,23 @@ function Tools() {
           </div>
         )}
         <p className="text-xs text-muted-foreground">Turn on ADB Debugging in Fire TV Settings → My Fire TV → Developer Options first. Once connected, open any app in the store and tap "Send to Firestick".</p>
+      </div>
+
+      <div className="glass space-y-3 rounded-2xl p-5">
+        <h2 className="flex items-center gap-2 text-xl font-bold"><Icons.Zap className="h-5 w-5 text-glow" />Send app to Firestick</h2>
+        <div className="grid max-h-80 gap-2 overflow-auto sm:grid-cols-2">
+          {sendable.map((a) => (
+            <button data-nav key={a.id} onClick={() => setSendId(a.id)} className={`tv-focus flex items-center gap-3 rounded-xl border p-3 text-left ${sendId === a.id ? "border-glow bg-glow/10" : "border-border bg-card"}`}>
+              {a.icon_url ? <img src={a.icon_url} alt="" className="h-10 w-10 rounded-lg object-cover" /> : <Icons.Package className="h-10 w-10 text-primary" />}
+              <span className="min-w-0"><span className="block truncate font-bold">{a.title}</span><span className="text-xs text-muted-foreground">v{a.version}{a.file_size ? ` · ${a.file_size}` : ""}</span></span>
+            </button>
+          ))}
+          {!sendable.length && <p className="text-sm text-muted-foreground">No apps available to send yet.</p>}
+        </div>
+        {sendPct && <div><div className="mb-1 text-sm">{sendPct.stage} {sendPct.pct}%</div><div className="h-2 overflow-hidden rounded-full bg-secondary"><div className="h-full bg-glow transition-all" style={{ width: `${sendPct.pct}%` }} /></div></div>}
+        <button data-nav disabled={!sendId || status !== "on" || sendPct !== null} onClick={() => send(sendable.find((a) => a.id === sendId))} className="tv-focus w-full rounded-xl bg-primary py-3 font-bold text-primary-foreground disabled:opacity-40">
+          {status !== "on" ? "Connect your Firestick above first" : sendPct ? "Sending…" : "⚡ Send to Firestick"}
+        </button>
       </div>
 
       {actions.some((a) => a.needs_package) && (

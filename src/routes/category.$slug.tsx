@@ -4,6 +4,8 @@ import { catalogQuery } from "@/lib/catalog";
 import { appsForCategory } from "@/lib/access";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { StoreHeader } from "@/components/tv/StoreHeader";
+import { useAuth } from "@/hooks/use-auth";
+import { VipLock } from "@/components/tv/VipLock";
 import { AppTile } from "@/components/tv/AppTile";
 
 export const Route = createFileRoute("/category/$slug")({
@@ -31,6 +33,7 @@ function CategoryPage() {
 
 function CategoryBody() {
   const { slug } = Route.useParams();
+  const { isVip } = useAuth();
   const { data, isLoading } = useQuery(catalogQuery);
   const cat = data?.categories.find((c) => c.slug === slug);
   const apps = data && cat ? appsForCategory(data.apps, cat) : [];
@@ -46,6 +49,7 @@ function CategoryBody() {
         {cat && (
           <>
             <h1 className={`text-3xl sm:text-5xl font-extrabold ${cat.is_vip ? "text-vip" : ""}`}>{cat.name}</h1>
+            {cat.is_vip && !isVip && <div className="pt-8"><VipLock title={cat.name} /></div>}
             {apps.length ? (
               <div className="flex flex-wrap gap-6 py-8">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
             ) : (
