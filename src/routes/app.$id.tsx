@@ -30,7 +30,7 @@ function AppDetail() {
   const { id } = Route.useParams();
   const router = useRouter();
   const { data: app, isLoading } = useQuery(appQuery(id));
-  const { user, level, ready } = useAuth();
+  const { user, level, ready, isAdmin } = useAuth();
   const [progress, setProgress] = useState<number | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
@@ -121,6 +121,9 @@ function AppDetail() {
               </p>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
+                {isAdmin && !isNative() && (
+                  <Link data-nav to="/admin" search={{ edit: app.id }} className="tv-focus order-last rounded-xl border border-border bg-secondary px-6 py-4 text-lg font-semibold">✏️ Edit app</Link>
+                )}
                 {allowed ? (
                   <>
                     <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">

@@ -16,6 +16,7 @@ import { BroadcastCard } from "@/components/admin/BroadcastCard";
 import { isNative } from "@/lib/native-install";
 
 export const Route = createFileRoute("/admin")({
+  validateSearch: (s: Record<string, unknown>): { edit?: string } => (typeof s.edit === "string" ? { edit: s.edit } : {}),
   ssr: false,
   head: () => ({
     meta: [
@@ -71,7 +72,7 @@ function AdminPage() {
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="remote">Remote Tools</TabsTrigger>
           </TabsList>
-          <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager /></TabsContent>
+          <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager editId={Route.useSearch().edit} /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
           <TabsContent value="vip" className="space-y-6"><OgVaultPassSyncCard /><VipManager /></TabsContent>
           <TabsContent value="members"><MembersManager /></TabsContent>
