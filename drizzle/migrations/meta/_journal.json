@@ -78,6 +78,13 @@
       "when": 1791674377520,
       "tag": "0010_four_tier_access",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791674454842,
+      "tag": "0011_guest_apps_for_everyone",
+      "breakpoints": true
     }
   ]
 }

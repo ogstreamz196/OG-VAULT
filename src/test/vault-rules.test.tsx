@@ -11,7 +11,9 @@ describe("app audiences", () => {
     expect(canSeeApp("free", ["vip"])).toBe(true);
     expect(canDownloadApp("free", ["vip"])).toBe(false);
   });
-  it("free members cannot see guest-only apps", () => expect(canSeeApp("free", ["guest"])).toBe(false));
+  it("everyone signed in sees and downloads guest apps", () => {
+    for (const l of ["guest", "free", "vip", "admin"] as const) expect(canDownloadApp(l, ["guest"])).toBe(true);
+  });
   it("VIP members download VIP, free and guest apps", () => {
     for (const a of ["vip", "free", "guest"]) expect(canDownloadApp("vip", [a])).toBe(true);
   });
