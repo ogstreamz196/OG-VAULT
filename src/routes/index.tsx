@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { TierBadge } from "@/components/tv/TvShell";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { StoreHeader } from "@/components/tv/StoreHeader";
-import { AppTile } from "@/components/tv/AppTile";
+import { AppTile, TileSkeleton } from "@/components/tv/AppTile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -46,26 +46,47 @@ function Home() {
   return (
     <div className="pb-20">
       <StoreHeader />
-      {isLoading && <p className="px-4 sm:px-14 pt-20 text-2xl text-muted-foreground">Loading the vault…</p>}
+      {isLoading && (
+        <div aria-label="Loading the vault">
+          <div className="skeleton mx-4 mt-8 h-[300px] rounded-3xl sm:mx-14 sm:h-[420px]" />
+          {[0, 1].map((r) => (
+            <section key={r} className="mt-12">
+              <div className="skeleton mx-4 h-6 w-48 rounded sm:mx-14" />
+              <div className="no-scrollbar flex gap-4 overflow-hidden px-4 py-6 sm:gap-6 sm:px-14">{Array.from({ length: 6 }, (_, i) => <TileSkeleton key={i} />)}</div>
+            </section>
+          ))}
+        </div>
+      )}
       {error && <p className="px-4 sm:px-14 pt-20 text-2xl text-vip">Couldn't load apps. Check your connection.</p>}
 
       {hero && (
-        <section className="glass relative mx-4 sm:mx-14 mt-8 h-[340px] sm:h-[420px] overflow-hidden rounded-3xl">
+        <section className="glass relative mx-4 sm:mx-14 mt-8 min-h-[340px] sm:h-[420px] overflow-hidden rounded-3xl">
           {hero.banner_url ? (
             <img src={hero.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
             <div className="absolute inset-0" style={{ background: "radial-gradient(circle at 75% 40%, color-mix(in oklab, var(--glow) 40%, transparent), transparent 50%), linear-gradient(120deg, var(--card), var(--primary))" }} />
           )}
+          <div aria-hidden className="animate-ambient pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full opacity-60 blur-3xl" style={{ background: "var(--glow)" }} />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
           <div className="relative flex h-full max-w-2xl flex-col justify-center gap-4 p-6 sm:p-12">
             <div className="flex items-center gap-3"><span className="text-sm uppercase tracking-[0.3em] text-glow">Featured</span><TierBadge tier={tierFromAudiences(hero.audiences)} /></div>
-            <h1 className="text-4xl sm:text-4xl sm:text-6xl font-extrabold leading-tight">{hero.title}</h1>
-            <p className="line-clamp-3 text-xl text-muted-foreground">{hero.description}</p>
+            <h1 className="text-3xl sm:text-6xl font-extrabold leading-tight">{hero.title}</h1>
+            <p className="line-clamp-3 text-base text-muted-foreground sm:text-xl">{hero.description}</p>
+            <div className="flex flex-wrap gap-2 text-xs font-semibold sm:text-sm">
+              <span className="rounded-full bg-secondary px-3 py-1">v{hero.version}</span>
+              {hero.file_size && <span className="rounded-full bg-secondary px-3 py-1">{hero.file_size}</span>}
+              <span className="rounded-full bg-secondary px-3 py-1">Build {hero.build_number}</span>
+            </div>
             <div className="flex gap-4 pt-2">
-              <Link data-nav data-nav-autofocus to="/app/$id" params={{ id: hero.id }} className="tv-focus rounded-xl bg-primary px-8 py-4 text-lg font-bold text-primary-foreground">View & Install</Link>
+              <Link data-nav data-nav-autofocus to="/app/$id" params={{ id: hero.id }} className="tv-focus rounded-xl bg-primary px-6 py-3 text-base font-bold sm:px-8 sm:py-4 sm:text-lg text-primary-foreground">View & Install</Link>
               {featured.length > 1 && <button data-nav onClick={() => setSlide((s) => (s + 1) % featured.length)} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Next ›</button>}
             </div>
           </div>
+          {featured.length > 1 && (
+            <div className="absolute bottom-4 right-6 flex gap-2">
+              {featured.map((f, i) => <span key={f.id} className={`h-1.5 rounded-full transition-all ${i === slide % featured.length ? "w-8 bg-glow" : "w-3 bg-muted-foreground/40"}`} />)}
+            </div>
+          )}
         </section>
       )}
 
@@ -84,8 +105,8 @@ function Home() {
 function Row({ title, apps }: { title: string; apps: AppRow[] }) {
   return (
     <section className="mt-12">
-      <h2 className="px-4 sm:px-14 text-2xl font-bold">{title}</h2>
-      <div className="no-scrollbar flex gap-6 overflow-x-auto px-4 sm:px-14 py-6">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
+      <h2 className="px-4 sm:px-14 text-xl sm:text-2xl font-bold">{title}</h2>
+      <div className="no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto px-4 sm:px-14 py-6">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
     </section>
   );
 }
@@ -93,8 +114,8 @@ function Row({ title, apps }: { title: string; apps: AppRow[] }) {
 function CategoryRowView({ category, apps, locked }: { category: CategoryRow; apps: AppRow[]; locked: boolean }) {
   return (
     <section className="mt-12">
-      <h2 className={`px-4 sm:px-14 text-2xl font-bold ${category.is_vip ? "text-vip" : ""}`}>{category.name}{category.is_vip && !locked ? " · Unlocked" : ""}</h2>
-      <div className="no-scrollbar flex gap-6 overflow-x-auto px-4 sm:px-14 py-6">
+      <h2 className={`px-4 sm:px-14 text-xl sm:text-2xl font-bold ${category.is_vip ? "text-vip" : ""}`}>{category.name}{category.is_vip && !locked ? " · Unlocked" : ""}</h2>
+      <div className="no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto px-4 sm:px-14 py-6">
         {locked ? (
           <Link data-nav to="/category/$slug" params={{ slug: category.slug }} className="tv-focus glass flex h-64 w-[85vw] sm:w-[34rem] shrink-0 items-center gap-6 rounded-2xl border-vip/60 p-8">
             <span className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-vip/20 text-4xl"><Lock className="h-9 w-9 text-vip" /></span>
