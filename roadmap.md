@@ -11,3 +11,5 @@
 - [x] Native AdbBridge plugin source (native/android) — needs building into the Android phone APK
 - [x] Push to Firestick (phone ADB install) + Wi-Fi auto-scan
 - [x] TV search, Updates page, Open App / Manage in Settings
+- [x] Replace Amazon launcher banner with supplied artwork; validate launcher references and restore missing Android theme colors
+- [ ] Compile and test the updated APK — requires Android Studio/JDK 21 and Android SDK unavailable in this workspace
