@@ -24,3 +24,4 @@
 - Uploads go to Cloudflare R2 (settings in `storage_settings`, service-role only) when enabled; browser PUTs to a server-presigned URL so large APKs skip the worker. Falls back to built-in storage.
 - AI store-copy generation calls Groq directly with the boss's GROQ_API_KEY (`src/lib/ai-copy.functions.ts`, admin-checked) — user chose not to spend Lovable credits.
 - Install/update state is a device-local ledger (`src/lib/installed.ts`) compared by build_number — no server tracking needed.
+- Phone ADB tools: `/tools` runs admin-defined `remote_actions` via `src/lib/adb-bridge.ts` (native AdbBridge plugin if present, else simulator) — buttons are data, not code.
