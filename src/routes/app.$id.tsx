@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { BrandLoader } from "@/components/tv/BrandLoader";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { installState, recordInstall, type InstallState } from "@/lib/installed";
@@ -91,7 +92,7 @@ function AppDetail() {
     } finally { setPushing(null); }
   }
 
-  if (!ready) return <div className="min-h-screen bg-background" />;
+  if (!ready) return <BrandLoader />;
   if (!user) return <TvShell key="signin" onBack={() => {}}><SignIn /></TvShell>;
   if (isLoading)
     return (

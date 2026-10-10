@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { focusFirst, installSpatialNav } from "@/lib/spatial-nav";
+import vaultEmblem from "@/assets/vault-emblem.webp.asset.json";
 
 export function TvShell({ children, onBack }: { children: ReactNode; onBack?: (() => void) | undefined }) {
   const router = useRouter();
@@ -20,7 +21,8 @@ export function TvShell({ children, onBack }: { children: ReactNode; onBack?: ((
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-baseline gap-2 font-display ${className}`}>
+    <div className={`flex items-center gap-2 font-display ${className}`}>
+      <img src={vaultEmblem.url} alt="" width={40} height={40} decoding="async" className="h-9 w-9 shrink-0 rounded-full ring-1 ring-glow/50 sm:h-11 sm:w-11" style={{ boxShadow: "0 0 14px color-mix(in oklab, var(--glow) 40%, transparent)" }} />
       <span className="text-3xl font-extrabold tracking-tight text-foreground">
         0G<span className="text-glow">VAULT</span>
       </span>
