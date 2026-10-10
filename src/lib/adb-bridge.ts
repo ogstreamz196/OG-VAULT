@@ -10,6 +10,8 @@ interface AdbBridgePlugin {
   scan(o: { port: number }): Promise<{ hosts: string[] }>;
   launchApp(o: { package: string }): Promise<void>;
   openAppSettings(o: { package: string }): Promise<void>;
+  isTv(): Promise<{ tv: boolean }>;
+  isInstalled(o: { package: string }): Promise<{ installed: boolean }>;
   addListener(e: "installProgress", cb: (d: { stage: "download" | "push"; pct: number }) => void): Promise<PluginListenerHandle>;
 }
 
@@ -91,4 +93,17 @@ export async function launchLocalApp(pkg: string) {
 export async function openLocalAppSettings(pkg: string) {
   if (!isNativeAdb()) throw new Error("Go to Settings → Applications → Manage Installed Applications");
   await Native.openAppSettings({ package: pkg });
+}
+
+/** True on Firestick / Android TV (native feature check, else Fire TV user agent). */
+export async function isTvDevice(): Promise<boolean> {
+  if (typeof navigator !== "undefined" && /AFT\w*|Android TV|GoogleTV|BRAVIA/i.test(navigator.userAgent)) return true;
+  if (isNativeAdb()) { try { return (await Native.isTv()).tv; } catch { return false; } }
+  return false;
+}
+
+/** Asks this device whether a package is installed; null when unknown (browser / old APK). */
+export async function isLocallyInstalled(pkg: string): Promise<boolean | null> {
+  if (!isNativeAdb() || !isValidPackage(pkg)) return null;
+  try { return (await Native.isInstalled({ package: pkg })).installed; } catch { return null; }
 }

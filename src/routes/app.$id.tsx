@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { logInstallEvent } from "@/lib/telemetry";
-import { adbConnect, adbInstall, isConnected, isNativeAdb, launchLocalApp, openLocalAppSettings, savedHost, type PushStage } from "@/lib/adb-bridge";
+import { adbConnect, adbInstall, isConnected, isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, savedHost, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 
 export const Route = createFileRoute("/app/$id")({
@@ -36,7 +36,18 @@ function AppDetail() {
   const [shot, setShot] = useState<string | null>(null);
   const [inst, setInst] = useState<InstallState>("none");
   const [pushing, setPushing] = useState<{ stage: PushStage; pct: number } | null>(null);
+  const [onTv, setOnTv] = useState(false);
+  const [onDevice, setOnDevice] = useState<boolean | null>(null);
   useEffect(() => { if (app) setInst(installState(app)); }, [app]);
+  useEffect(() => { isTvDevice().then(setOnTv); }, []);
+  useEffect(() => {
+    if (!app?.package_name) return;
+    isLocallyInstalled(app.package_name).then((r) => {
+      setOnDevice(r);
+      if (r === true) setInst((s) => (s === "none" ? "installed" : s));
+      if (r === false) setInst("none");
+    });
+  }, [app, progress]);
 
   const back = () => (shot ? setShot(null) : router.navigate({ to: "/" }));
 
@@ -142,10 +153,10 @@ function AppDetail() {
                     <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
                       {progress !== null ? `Downloading ${progress}%` : inst === "update" ? "Update available — Install" : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
                     </button>
-                    <button data-nav onClick={sendToStick} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl border border-glow/60 px-6 py-4 text-lg font-bold text-glow disabled:opacity-70">
+                    {!onTv && <button data-nav onClick={sendToStick} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl border border-glow/60 px-6 py-4 text-lg font-bold text-glow disabled:opacity-70">
                       {pushing ? `${pushing.stage === "download" ? "Downloading to phone" : "Pushing to TV"} ${pushing.pct}%` : "⚡ Send to Firestick"}
-                    </button>
-                    {inst !== "none" && app.package_name && isNativeAdb() && (
+                    </button>}
+                    {(onDevice ?? inst !== "none") && app.package_name && isNativeAdb() && (
                       <>
                         <button data-nav onClick={() => launchLocalApp(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Open App</button>
                         <button data-nav onClick={() => openLocalAppSettings(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Manage in Settings</button>
