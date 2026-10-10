@@ -11,4 +11,10 @@ The app loads the live store from https://vault.ogstreamz.co.uk, so store change
 Only rebuild after changing `capacitor.config.ts` or native code (`npx cap sync android` first).
 
 `AdbBridgePlugin.java` here is the master copy; it is also copied into
-`android/app/src/main/java/com/ogstreamz/ogvault/`. Keep both in sync.
+`android/app/src/main/java/og/vault/`. Keep both in sync.
+
+The Fire TV launcher uses `@drawable/tv_banner` on both the application and
+launcher activity. Its 320×180 and 640×360 resources preserve the complete
+supplied 16:9 artwork; these must remain real Android resources, not CDN links.
+After changing launcher artwork, rebuild and install the APK. Fire TV may cache
+the old tile; restart the stick if it remains visible.
