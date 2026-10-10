@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { logInstallEvent } from "@/lib/telemetry";
+import { adbConnect, adbInstall, isConnected, isNativeAdb, launchLocalApp, openLocalAppSettings, savedHost, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 
 export const Route = createFileRoute("/app/$id")({
@@ -33,6 +34,7 @@ function AppDetail() {
   const [status, setStatus] = useState<string | null>(null);
   const [shot, setShot] = useState<string | null>(null);
   const [inst, setInst] = useState<InstallState>("none");
+  const [pushing, setPushing] = useState<{ stage: PushStage; pct: number } | null>(null);
   useEffect(() => { if (app) setInst(installState(app)); }, [app]);
 
   const back = () => (shot ? setShot(null) : router.navigate({ to: "/" }));
@@ -60,6 +62,33 @@ function AppDetail() {
     } finally {
       setTimeout(() => setProgress(null), 800);
     }
+  }
+
+  async function sendToStick() {
+    if (!app?.apk_url) return setStatus("No APK file is available for this app yet.");
+    setStatus(null);
+    try {
+      if (!isConnected()) {
+        const host = savedHost();
+        if (!host) { setStatus("Connect your Firestick first in Tools."); router.navigate({ to: "/tools" }); return; }
+        setStatus(`Connecting to ${host}… accept the prompt on your TV.`);
+        await adbConnect(host, 5555);
+      }
+      setPushing({ stage: "download", pct: 0 });
+      logInstallEvent(app.id, user?.id, "download_started");
+      let pushed = false;
+      const out = await adbInstall(app.apk_url, (stage, pct) => {
+        if (stage === "push" && !pushed) { pushed = true; logInstallEvent(app.id, user?.id, "download_completed"); }
+        setPushing({ stage, pct });
+      });
+      if (!/success/i.test(out)) throw new Error(out || "Install failed");
+      logInstallEvent(app.id, user?.id, "install_prompted");
+      setStatus(`Installed on your Firestick ✓`);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Send failed";
+      logInstallEvent(app.id, user?.id, "install_failed", msg);
+      setStatus(msg);
+    } finally { setPushing(null); }
   }
 
   if (!ready) return <div className="min-h-screen bg-background" />;
@@ -98,11 +127,22 @@ function AppDetail() {
                 Version {app.version} · Build {app.build_number}{app.file_size ? ` · ${app.file_size}` : ""}{app.package_name ? ` · ${app.package_name}` : ""}
               </p>
 
-              <div className="flex items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-4 pt-2">
                 {allowed ? (
-                  <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
-                    {progress !== null ? `Downloading ${progress}%` : inst === "update" ? "Update available — Install" : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
-                  </button>
+                  <>
+                    <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
+                      {progress !== null ? `Downloading ${progress}%` : inst === "update" ? "Update available — Install" : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
+                    </button>
+                    <button data-nav onClick={sendToStick} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl border border-glow/60 px-6 py-4 text-lg font-bold text-glow disabled:opacity-70">
+                      {pushing ? `${pushing.stage === "download" ? "Downloading to phone" : "Pushing to TV"} ${pushing.pct}%` : "⚡ Send to Firestick"}
+                    </button>
+                    {inst !== "none" && app.package_name && isNativeAdb() && (
+                      <>
+                        <button data-nav onClick={() => launchLocalApp(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Open App</button>
+                        <button data-nav onClick={() => openLocalAppSettings(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Manage in Settings</button>
+                      </>
+                    )}
+                  </>
                 ) : (
                   <div className="flex items-center gap-4">
                     <span className="rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg">VIP access required to install this app</span>
@@ -113,6 +153,11 @@ function AppDetail() {
               {progress !== null && (
                 <div className="h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted">
                   <div className="h-full bg-glow transition-all" style={{ width: `${progress}%` }} />
+                </div>
+              )}
+              {pushing && (
+                <div className="h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted">
+                  <div className="h-full bg-primary transition-all" style={{ width: `${pushing.pct}%` }} />
                 </div>
               )}
               {status && <p className="text-lg text-glow">{status}</p>}
