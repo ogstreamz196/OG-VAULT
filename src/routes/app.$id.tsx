@@ -93,7 +93,15 @@ function AppDetail() {
 
   if (!ready) return <div className="min-h-screen bg-background" />;
   if (!user) return <TvShell key="signin" onBack={() => {}}><SignIn /></TvShell>;
-  if (isLoading) return <TvShell><p className="p-14 text-2xl text-muted-foreground">Loading…</p></TvShell>;
+  if (isLoading)
+    return (
+      <TvShell>
+        <div className="flex flex-col gap-6 px-4 pt-24 sm:flex-row sm:px-14">
+          <div className="skeleton h-28 w-28 rounded-3xl sm:h-48 sm:w-48" />
+          <div className="flex-1 space-y-4"><div className="skeleton h-10 w-2/3 rounded" /><div className="skeleton h-5 w-1/2 rounded" /><div className="skeleton h-14 w-60 rounded-xl" /></div>
+        </div>
+      </TvShell>
+    );
   if (!app)
     return (
       <TvShell>
@@ -150,15 +158,12 @@ function AppDetail() {
                   </div>
                 )}
               </div>
-              {progress !== null && (
-                <div className="h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted">
-                  <div className="h-full bg-glow transition-all" style={{ width: `${progress}%` }} />
-                </div>
-              )}
-              {pushing && (
-                <div className="h-3 w-full max-w-xl overflow-hidden rounded-full bg-muted">
-                  <div className="h-full bg-primary transition-all" style={{ width: `${pushing.pct}%` }} />
-                </div>
+              {(progress !== null || pushing) && (
+                <InstallHud
+                  pct={progress ?? pushing!.pct}
+                  stages={pushing ? ["Downloading APK", "Streaming to Firestick", "Launching installer"] : ["Downloading APK", "Launching installer"]}
+                  active={pushing ? (pushing.stage === "download" ? 0 : pushing.pct >= 100 ? 2 : 1) : progress! >= 100 ? 1 : 0}
+                />
               )}
               {status && <p className="text-lg text-glow">{status}</p>}
             </div>
@@ -177,12 +182,26 @@ function AppDetail() {
             </section>
           )}
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-2">
-            <section className="glass rounded-2xl p-8">
+          <section className="glass mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl sm:grid-cols-4">
+            {[
+              ["Version", app.version],
+              ["Build", String(app.build_number)],
+              ["Size", app.file_size || "—"],
+              ["Package", app.package_name || "—"],
+            ].map(([k, v]) => (
+              <div key={k} className="min-w-0 bg-card/60 p-4 sm:p-6">
+                <div className="text-xs uppercase tracking-widest text-muted-foreground">{k}</div>
+                <div className="mt-1 truncate text-base font-bold sm:text-lg" title={v}>{v}</div>
+              </div>
+            ))}
+          </section>
+
+          <div className="mt-8 grid gap-8 lg:grid-cols-2">
+            <section className="glass rounded-2xl p-5 sm:p-8">
               <h2 className="text-2xl font-bold">About</h2>
               <p className="mt-3 whitespace-pre-line text-lg leading-relaxed text-muted-foreground">{app.description || "No description yet."}</p>
             </section>
-            <section className="glass rounded-2xl p-8">
+            <section className="glass rounded-2xl p-5 sm:p-8">
               <h2 className="text-2xl font-bold">What's new</h2>
               <p className="mt-3 whitespace-pre-line text-lg leading-relaxed text-muted-foreground">{app.changelog.replace(/\\n/g, "\n") || "No changelog."}</p>
             </section>
@@ -197,5 +216,25 @@ function AppDetail() {
         )}
       </div>
     </TvShell>
+  );
+}
+
+function InstallHud({ pct, stages, active }: { pct: number; stages: string[]; active: number }) {
+  const r = 26, c = 2 * Math.PI * r;
+  return (
+    <div className="glass flex w-full max-w-xl items-center gap-5 rounded-2xl p-4">
+      <svg viewBox="0 0 64 64" className="h-16 w-16 shrink-0 -rotate-90">
+        <circle cx="32" cy="32" r={r} fill="none" stroke="var(--muted)" strokeWidth="6" />
+        <circle cx="32" cy="32" r={r} fill="none" stroke="var(--glow)" strokeWidth="6" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} style={{ transition: "stroke-dashoffset .3s", filter: "drop-shadow(0 0 6px var(--glow))" }} />
+        <text x="32" y="36" textAnchor="middle" className="rotate-90 fill-foreground text-[13px] font-bold" style={{ transformOrigin: "32px 32px" }}>{pct}%</text>
+      </svg>
+      <ol className="min-w-0 flex-1 space-y-1.5">
+        {stages.map((s, i) => (
+          <li key={s} className={`flex items-center gap-2 text-sm font-semibold ${i < active ? "text-muted-foreground line-through" : i === active ? "text-glow" : "text-muted-foreground/60"}`}>
+            <span className={`h-2 w-2 shrink-0 rounded-full ${i <= active ? "bg-glow" : "bg-muted"} ${i === active ? "animate-pulse" : ""}`} />{s}
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

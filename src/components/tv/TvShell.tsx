@@ -15,7 +15,7 @@ export function TvShell({ children, onBack }: { children: ReactNode; onBack?: ((
       clearTimeout(t);
     };
   }, [onBack, router]);
-  return <div className="min-h-screen bg-background text-foreground overflow-x-hidden">{children}</div>;
+  return <div className="min-h-screen bg-background pb-24 text-foreground overflow-x-hidden sm:pb-0">{children}</div>;
 }
 
 export function Logo({ className = "" }: { className?: string }) {
