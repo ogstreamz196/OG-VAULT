@@ -133,3 +133,7 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-portal-in, .animate-portal-spin, .animate-portal-pulse, .animate-rise-in { animation: none; }
 }
+
+@keyframes ticker-scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+.ticker { display: inline-block; min-width: 100%; animation: ticker-scroll 18s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .ticker { animation: none; } }
