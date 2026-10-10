@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 
 const DURATIONS = [["30", "1 month"], ["90", "3 months"], ["180", "6 months"], ["365", "1 year"], ["0", "Lifetime"]] as const;
 
@@ -55,7 +56,12 @@ export function MembersManager() {
                 {active(p.id) ? `VIP${data?.vip.get(p.id)?.expires_at ? ` until ${new Date(data.vip.get(p.id)!.expires_at!).toLocaleDateString()}` : ""}` : "Member"}
               </td>
               <td className="whitespace-nowrap py-2 text-right">
-                {active(p.id) ? <Button size="sm" variant="secondary" onClick={() => revoke(p.id)}>Remove VIP</Button> : <span className="inline-flex gap-1"><select className="rounded-md border bg-background px-2 text-sm" value={dur[p.id] ?? "30"} onChange={(e) => setDur((d) => ({ ...d, [p.id]: e.target.value }))}>{DURATIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select><Button size="sm" onClick={() => grant(p.id)}>Grant VIP</Button></span>}
+                <span className="inline-flex items-center gap-2">
+                  {!active(p.id) && <select className="rounded-md border bg-background px-2 py-1 text-sm" value={dur[p.id] ?? "30"} onChange={(e) => setDur((d) => ({ ...d, [p.id]: e.target.value }))}>{DURATIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>}
+                  <span className="text-xs text-muted-foreground">Free</span>
+                  <Switch checked={active(p.id)} onCheckedChange={(on) => (on ? grant(p.id) : revoke(p.id))} aria-label={`VIP for ${p.username}`} />
+                  <span className="text-xs font-bold text-vip">VIP</span>
+                </span>
               </td>
             </tr>
           ))}

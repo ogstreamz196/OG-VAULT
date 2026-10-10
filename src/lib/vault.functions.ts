@@ -77,34 +77,49 @@ export const vaultSignIn = createServerFn({ method: "POST" })
     const matches = (r: Awaited<ReturnType<typeof findRow>>) => !!r && r.active && safeEqual(r.password, data.password);
 
     const live = await verifyLive(data.username, data.password);
-    if (live === false) return { ok: false as const, error: "Wrong 0G Vault ID or PIN" };
-    let row = await findRow();
-    if (!matches(row) && live === true) { await syncVault(); row = await findRow(); }
-    if (!row || !matches(row)) return { ok: false as const, error: "Wrong 0G Vault ID or PIN" };
+    let row = live === false ? null : await findRow();
+    if (live === true && !matches(row)) { await syncVault(); row = await findRow(); }
 
-    const local = vaultEmailLocal(row.username);
-    const email = `${local}@users.ogvault.app`;
-    const authPw = await hmacHex(secret, `auth:${email}`);
-
-    let userId: string | null = null;
-    const { data: prof } = await supabaseAdmin.from("profiles").select("id").eq("username", local).maybeSingle();
-    if (prof) {
-      userId = prof.id;
-      await supabaseAdmin.auth.admin.updateUserById(prof.id, { password: authPw });
-    } else {
-      const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email, password: authPw, email_confirm: true, user_metadata: { username: local } });
-      if (error && !/already/i.test(error.message)) return { ok: false as const, error: "Could not open your account" };
-      userId = created?.user?.id ?? null;
-      if (error) {
-        const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
-        const u = list?.users.find((x) => x.email === email);
-        if (u) { userId = u.id; await supabaseAdmin.auth.admin.updateUserById(u.id, { password: authPw }); }
+    const openAccount = async (local: string) => {
+      const email = `${local}@users.ogvault.app`;
+      const authPw = await hmacHex(secret, `auth:${email}`);
+      let userId: string | null = null;
+      const { data: prof } = await supabaseAdmin.from("profiles").select("id").eq("username", local).maybeSingle();
+      if (prof) {
+        userId = prof.id;
+        await supabaseAdmin.auth.admin.updateUserById(prof.id, { password: authPw });
+      } else {
+        const { data: created, error } = await supabaseAdmin.auth.admin.createUser({ email, password: authPw, email_confirm: true, user_metadata: { username: local } });
+        if (error && !/already/i.test(error.message)) return null;
+        userId = created?.user?.id ?? null;
+        if (error) {
+          const { data: list } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+          const u = list?.users.find((x) => x.email === email);
+          if (u) { userId = u.id; await supabaseAdmin.auth.admin.updateUserById(u.id, { password: authPw }); }
+        }
       }
+      return { userId, email, authPw };
+    };
+
+    // 1) 0G Vault Pass → VIP
+    if (live !== false && row && matches(row)) {
+      const acc = await openAccount(vaultEmailLocal(row.username));
+      if (!acc) return { ok: false as const, error: "Could not open your account" };
+      if (acc.userId) {
+        const { error: vipErr } = await supabaseAdmin.from("vip_members").upsert({ user_id: acc.userId, expires_at: null, code_id: null }, { onConflict: "user_id" });
+        if (vipErr) console.error("[vault] vip grant failed", vipErr.message);
+      }
+      return { ok: true as const, email: acc.email, token: acc.authPw };
     }
-    // Every active 0G Vault pass holder is a VIP.
-    if (userId) {
-      const { error: vipErr } = await supabaseAdmin.from("vip_members").upsert({ user_id: userId, expires_at: null, code_id: null }, { onConflict: "user_id" });
-      if (vipErr) console.error("[vault] vip grant failed", vipErr.message);
-    }
-    return { ok: true as const, email, token: authPw };
+
+    // 2) M3U / Xtream account → Free member (auth only, no playlist data kept)
+    const { checkM3u } = await import("@/lib/m3u-auth.server");
+    const m3u = await checkM3u(data.username.trim(), data.password);
+    if (m3u === "expired") return { ok: false as const, error: "Account expired" };
+    if (m3u === "unreachable") return { ok: false as const, error: "Could not reach the login server, try again" };
+    if (m3u !== "active") return { ok: false as const, error: "Account does not exist or password is wrong" };
+    const local = "m3u." + data.username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(0, 60);
+    const acc = await openAccount(local);
+    if (!acc) return { ok: false as const, error: "Could not open your account" };
+    return { ok: true as const, email: acc.email, token: acc.authPw };
   });
