@@ -30,16 +30,25 @@ function Tools() {
   const [packages, setPackages] = useState<string[]>([]);
   const [log, setLog] = useState<string[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
-  useEffect(() => { setHost(localStorage.getItem("ogvault.adbHost") ?? ""); }, []);
+  const [found, setFound] = useState<string[] | null>(null);
+  const [scanning, setScanning] = useState(false);
+  useEffect(() => { setHost(savedHost()); if (isConnected()) setStatus("on"); }, []);
   const push = (s: string) => setLog((l) => [s, ...l].slice(0, 30));
 
-  async function connect() {
-    if (status === "on") { await adbDisconnect(); setStatus("off"); return; }
-    if (!isValidHost(host)) return push("Enter your Firestick IP, e.g. 192.168.1.45");
+  async function scan() {
+    setScanning(true); setFound(null); push("Scanning your Wi-Fi for Firesticks…");
+    try { const h = await adbScan(); setFound(h); push(h.length ? `Found ${h.length} device(s)` : "No Firesticks found — is ADB Debugging on?"); }
+    catch (e) { push(`Scan failed: ${(e as Error).message}`); } finally { setScanning(false); }
+  }
+
+  async function connect(target = host) {
+    if (status === "on" && target === host) { await adbDisconnect(); setStatus("off"); return; }
+    if (!isValidHost(target)) return push("Enter your Firestick IP, e.g. 192.168.1.45");
+    setHost(target);
     setStatus("connecting"); push("Connecting… accept 'Allow USB debugging' on your TV.");
     try {
-      if (!(await adbConnect(host, 5555))) throw new Error("Connection refused");
-      localStorage.setItem("ogvault.adbHost", host); setStatus("on"); push(`Connected to ${host}`);
+      if (!(await adbConnect(target, 5555))) throw new Error("Connection refused");
+      saveHost(target); setStatus("on"); push(`Connected to ${target}`);
       const out = await adbShell("pm list packages -3");
       setPackages(out.split("\n").map((l) => l.replace(/^.*package:/, "").trim()).filter(Boolean));
     } catch (e) { setStatus("off"); push(`Failed: ${(e as Error).message}`); }
