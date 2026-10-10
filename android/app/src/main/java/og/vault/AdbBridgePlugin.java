@@ -1,4 +1,4 @@
-package com.ogstreamz.ogvault;
+package og.vault;
 
 // Native "AdbBridge" Capacitor plugin: phone -> Firestick ADB over Wi-Fi.
 // Matches the interface in src/lib/adb-bridge.ts.
