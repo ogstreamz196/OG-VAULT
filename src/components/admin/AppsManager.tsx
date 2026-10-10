@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
@@ -22,11 +22,17 @@ const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: 
 type Draft = TablesInsert<"apps">;
 const empty: Draft = { title: "", package_name: "", version: "1.0.0", build_number: 1, description: "", changelog: "", tier: "free", audiences: ["free", "vip"], is_active: true, is_featured: false, category_id: null, icon_url: null, banner_url: null, screenshots: [], apk_url: null, file_size: null };
 
-export function AppsManager() {
+export function AppsManager({ editId }: { editId?: string | undefined } = {}) {
   const qc = useQueryClient();
   const apps = useQuery({ queryKey: ["admin-apps"], queryFn: async () => (await supabase.from("apps").select("*").order("created_at", { ascending: false }).throwOnError()).data! });
   const cats = useQuery({ queryKey: ["admin-cats"], queryFn: async () => (await supabase.from("categories").select("*").order("sort_order").throwOnError()).data! });
   const [editing, setEditing] = useState<Draft | null>(null);
+  const [opened, setOpened] = useState(false);
+  useEffect(() => {
+    if (opened || !editId || !apps.data) return;
+    const a = apps.data.find((x) => x.id === editId);
+    if (a) { setEditing({ ...a }); setOpened(true); }
+  }, [editId, apps.data, opened]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
 
