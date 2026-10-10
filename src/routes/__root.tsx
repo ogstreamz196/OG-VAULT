@@ -80,8 +80,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OG VAULT" },
-      { name: "description", content: "OG VAULT — the OGSTREAMZ app store for Firestick." },
+      { title: "0G VAULT - APP STORE" },
+      { name: "description", content: "0G VAULT — the OGSTREAMZ app store for Firestick." },
       { name: "author", content: "OGSTREAMZ" },
       { name: "theme-color", content: "#040714" },
     ],

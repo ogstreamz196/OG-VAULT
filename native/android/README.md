@@ -1,4 +1,4 @@
-# OG VAULT Android app (phone + Firestick, one APK)
+# 0G VAULT - APP STORE Android app (phone + Firestick, one APK)
 
 The `android/` folder is ready to open in Android Studio — the ADB plugin, dadb library,
 permissions, Fire TV banner/launcher and icons are already wired in.

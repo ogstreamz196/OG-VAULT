@@ -9,9 +9,9 @@ import { adbConnect, adbDisconnect, adbScan, adbShell, buildCommand, isConnected
 export const Route = createFileRoute("/tools")({
   head: () => ({
     meta: [
-      { title: "Firestick Remote Tools — OG VAULT" },
+      { title: "Firestick Remote Tools — 0G VAULT" },
       { name: "description", content: "Clear caches, force stop apps and reboot your Firestick from your phone." },
-      { property: "og:title", content: "Firestick Remote Tools — OG VAULT" },
+      { property: "og:title", content: "Firestick Remote Tools — 0G VAULT" },
       { property: "og:description", content: "One-tap Firestick maintenance from your phone over Wi-Fi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -69,7 +69,7 @@ function Tools() {
         <h1 className="text-3xl font-black text-glow">Firestick Remote Tools</h1>
         <Link data-nav to="/" className="tv-focus rounded-lg px-3 py-2 text-muted-foreground">← Store</Link>
       </div>
-      {!isNativeAdb() && <p className="rounded-xl border border-amber-500/40 p-3 text-sm text-muted-foreground">Simulator mode — real Firestick control works in the OG VAULT phone app on the same Wi-Fi.</p>}
+      {!isNativeAdb() && <p className="rounded-xl border border-amber-500/40 p-3 text-sm text-muted-foreground">Simulator mode — real Firestick control works in the 0G VAULT phone app on the same Wi-Fi.</p>}
 
       <div className="glass space-y-3 rounded-2xl p-5">
         <div className="flex items-center gap-2 text-sm"><span className={`h-3 w-3 rounded-full ${dot}`} />{status === "on" ? "Connected" : status === "connecting" ? "Waiting for TV…" : "Disconnected"}</div>

@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.ogstreamz.ogvault",
-  appName: "OG VAULT",
+  appName: "0G VAULT - APP STORE",
   webDir: "dist/client",
   // Point the Firestick build at the hosted store so catalog updates ship instantly.
   server: {

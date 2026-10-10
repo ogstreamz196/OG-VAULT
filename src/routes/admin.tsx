@@ -18,10 +18,10 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Boss Control Panel — OG VAULT" },
-      { name: "description", content: "Manage OG VAULT apps, media, APKs, categories, VIP codes and members." },
-      { property: "og:title", content: "Boss Control Panel — OG VAULT" },
-      { property: "og:description", content: "OGSTREAMZ boss control panel for the OG VAULT store." },
+      { title: "Boss Control Panel — 0G VAULT" },
+      { name: "description", content: "Manage 0G VAULT apps, media, APKs, categories, VIP codes and members." },
+      { property: "og:title", content: "Boss Control Panel — 0G VAULT" },
+      { property: "og:description", content: "OGSTREAMZ boss control panel for the 0G VAULT store." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
