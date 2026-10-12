@@ -103,8 +103,8 @@ function AppDetail() {
   return (
     <TvShell onBack={back}>
       <div className="relative min-h-screen">
-        {app.banner_url && <img src={app.banner_url} alt="" className="absolute inset-x-0 top-0 h-[460px] w-full object-cover opacity-30" />}
-        <div className="absolute inset-x-0 top-0 h-[460px]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
+        {app.banner_url && <img src={app.banner_url} alt="" className="absolute inset-x-0 top-0 h-[28.75rem] w-full object-cover opacity-30" />}
+        <div className="absolute inset-x-0 top-0 h-[28.75rem]" style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }} />
         <div className="relative px-4 sm:px-14 pt-10 pb-20">
           <button data-nav onClick={back} className="tv-focus rounded-xl bg-secondary px-5 py-2.5 font-semibold">‹ Back</button>
 
