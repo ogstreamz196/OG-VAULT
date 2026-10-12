@@ -80,7 +80,20 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { color-scheme: dark; }
+  html {
+    color-scheme: dark;
+    /* Stop Android/Fire OS from inflating text on rotation or by system font scale. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  /* Fluid TV scaling: the store is laid out for a 1280x720 canvas. Every size is in rem,
+     so shrinking the root font keeps the layout proportional on any landscape screen.
+     A 1080p Firestick WebView reports 960x540 CSS px, which gives 12px here instead of the
+     desktop 16px; 720p sticks and small windows scale the same way. Phones in portrait
+     stay below the sm breakpoint and keep the browser default. */
+  @media (min-width: 40rem) {
+    html { font-size: clamp(11px, min(1.25vw, 2.2222vh), 16px); }
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

@@ -44,7 +44,7 @@ function Home() {
       <StoreHeader />
       {isLoading && (
         <div aria-label="Loading the vault">
-          <div className="skeleton mx-4 mt-8 h-[300px] rounded-3xl sm:mx-14 sm:h-[420px]" />
+          <div className="skeleton mx-4 mt-8 h-[18.75rem] rounded-3xl sm:mx-14 sm:h-[min(26.25rem,58vh)]" />
           {[0, 1].map((r) => (
             <section key={r} className="mt-12">
               <div className="skeleton mx-4 h-6 w-48 rounded sm:mx-14" />
@@ -56,7 +56,7 @@ function Home() {
       {error && <p className="px-4 sm:px-14 pt-20 text-2xl text-vip">Couldn't load apps. Check your connection.</p>}
 
       {hero && (
-        <section className="glass relative mx-4 sm:mx-14 mt-8 min-h-[340px] sm:h-[420px] overflow-hidden rounded-3xl">
+        <section className="glass relative mx-4 mt-8 flex min-h-[21.25rem] overflow-hidden rounded-3xl sm:mx-14 sm:min-h-[min(26.25rem,58vh)]">
           {hero.banner_url ? (
             <img src={hero.banner_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
           ) : (
@@ -64,7 +64,7 @@ function Home() {
           )}
           <div aria-hidden className="animate-ambient pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full opacity-60 blur-3xl" style={{ background: "var(--glow)" }} />
           <div className="absolute inset-0" style={{ background: "var(--gradient-hero)" }} />
-          <div className="relative flex h-full max-w-2xl flex-col justify-center gap-4 p-6 sm:p-12">
+          <div className="relative flex max-w-2xl flex-col justify-center gap-4 p-6 sm:p-10">
             <div className="flex items-center gap-3"><span className="text-sm uppercase tracking-[0.3em] text-glow">Featured</span><TierBadge tier={tierFromAudiences(hero.audiences)} /></div>
             <h1 className="text-3xl sm:text-6xl font-extrabold leading-tight">{hero.title}</h1>
             <p className="line-clamp-3 text-base text-muted-foreground sm:text-xl">{hero.description}</p>
