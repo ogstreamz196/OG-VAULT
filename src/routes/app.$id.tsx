@@ -11,6 +11,7 @@ import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { logInstallEvent } from "@/lib/telemetry";
 import { isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
+import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/app/$id")({
   head: () => ({
