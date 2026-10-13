@@ -11,6 +11,7 @@ import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { logInstallEvent } from "@/lib/telemetry";
 import { isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
+import { VaultPassModal } from "@/components/tv/VaultPassModal";
 import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/app/$id")({
@@ -39,6 +40,7 @@ function AppDetail() {
   const [pushing, setPushing] = useState<{ stage: PushStage; pct: number } | null>(null);
   const [onTv, setOnTv] = useState(false);
   const [onDevice, setOnDevice] = useState<boolean | null>(null);
+  const [passOpen, setPassOpen] = useState(false);
   useEffect(() => { if (app) setInst(installState(app)); }, [app]);
   useEffect(() => { isTvDevice().then(setOnTv); }, []);
   useEffect(() => {
@@ -50,7 +52,11 @@ function AppDetail() {
     });
   }, [app, progress]);
 
-  const back = () => (shot ? setShot(null) : router.navigate({ to: "/" }));
+  const back = () => {
+    if (passOpen) return setPassOpen(false);
+    if (shot) return setShot(null);
+    router.navigate({ to: "/" });
+  };
 
   async function install() {
     if (!app?.apk_url) return setStatus("No APK file is available for this app yet.");
