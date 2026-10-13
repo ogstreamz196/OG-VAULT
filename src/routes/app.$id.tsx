@@ -139,7 +139,7 @@ function AppDetail() {
                 ) : (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-4">
-                      <button disabled className="flex items-center gap-2 rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg font-bold opacity-80">🔒 VIP only — Download locked</button>
+                      <button disabled className="flex items-center gap-2 rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg font-bold opacity-80"><Lock className="h-5 w-5" />Vault Pass required</button>
                       <a data-nav data-nav-autofocus href="https://ogbot.co.uk" target="_blank" rel="noopener noreferrer" className="tv-focus rounded-xl bg-vip px-6 py-4 font-bold text-primary-foreground">Get Vault Pass</a>
                     </div>
                     <p className="text-muted-foreground">Visit <span className="font-bold text-foreground">ogbot.co.uk</span> and buy the Vault Pass from the store to unlock VIP apps.</p>
