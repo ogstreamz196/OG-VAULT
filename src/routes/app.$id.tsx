@@ -146,8 +146,8 @@ function AppDetail() {
                 ) : (
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-4">
-                      <button disabled className="flex items-center gap-2 rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg font-bold opacity-80"><Lock className="h-5 w-5" />Vault Pass required</button>
-                      <a data-nav data-nav-autofocus href="https://ogbot.co.uk" target="_blank" rel="noopener noreferrer" className="tv-focus rounded-xl bg-vip px-6 py-4 font-bold text-primary-foreground">Get Vault Pass</a>
+                      <button data-nav onClick={() => setPassOpen(true)} className="tv-focus flex items-center gap-2 rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg font-bold"><Lock className="h-5 w-5" />Vault Pass required</button>
+                      <button data-nav data-nav-autofocus onClick={() => setPassOpen(true)} className="tv-focus rounded-xl bg-vip px-6 py-4 font-bold text-primary-foreground">Get Vault Pass</button>
                     </div>
                     <p className="text-muted-foreground">Visit <span className="font-bold text-foreground">ogbot.co.uk</span> and buy the Vault Pass from the store to unlock VIP apps.</p>
                   </div>
@@ -209,6 +209,7 @@ function AppDetail() {
             <button data-nav data-nav-autofocus autoFocus onClick={() => setShot(null)} className="tv-focus absolute right-10 top-10 rounded-xl bg-secondary px-5 py-2.5 font-semibold">Close</button>
           </div>
         )}
+        <VaultPassModal open={passOpen} onClose={() => setPassOpen(false)} />
       </div>
     </TvShell>
   );
