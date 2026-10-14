@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
 import { installSpatialNav, type BackHandler } from "@/lib/spatial-nav";
-import vaultEmblem from "@/assets/vault-emblem.webp.asset.json";
 import brandLogo from "@/assets/og-streamz-brand.webp.asset.json";
 
 /**
@@ -28,7 +27,7 @@ export function TvShell({ children, onBack }: { children: ReactNode; onBack?: Ba
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 sm:gap-3 ${className}`}>
-      <img src={vaultEmblem.url} alt="0G Vault" width={80} height={80} decoding="async" className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20" />
+      <img src="/og-vault-logo.webp" alt="0G Vault" width={80} height={80} decoding="async" className="h-16 w-16 shrink-0 rounded-xl object-cover sm:h-20 sm:w-20" />
       <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground sm:text-xs">by</span>
       <img src={brandLogo.url} alt="OGSTREAMZ" height={80} decoding="async" className="h-16 w-auto max-w-[60vw] shrink-0 object-contain sm:h-20" />
     </div>

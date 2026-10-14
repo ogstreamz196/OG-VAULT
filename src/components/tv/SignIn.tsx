@@ -2,7 +2,6 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { vaultSignIn } from "@/lib/vault.functions";
-import vaultLogo from "@/assets/og-vault-logo.jpg.asset.json";
 
 const field =
   "tv-focus w-full rounded-xl border border-input bg-muted/80 px-4 py-3.5 text-lg sm:px-5 sm:py-4 sm:text-xl text-foreground placeholder:text-muted-foreground focus:border-glow";
@@ -44,8 +43,8 @@ export function SignIn() {
           style={{ background: "conic-gradient(from 0deg, var(--glow), transparent 25%, var(--primary) 50%, transparent 75%, var(--glow))" }} />
         <div className="animate-portal-pulse absolute -inset-2 rounded-[2rem] border-2 border-glow/60 sm:-inset-3"
           style={{ boxShadow: "0 0 60px 6px color-mix(in oklab, var(--glow) 45%, transparent), inset 0 0 40px color-mix(in oklab, var(--glow) 35%, transparent)" }} />
-        <img src={vaultLogo.url} alt="ØG-VAULT — All your apps in one place"
-          className="animate-portal-in relative aspect-square w-full rounded-[1.75rem] object-cover object-top shadow-2xl" />
+        <img src="/og-vault-logo.webp" alt="0G VAULT"
+          className="animate-portal-in relative aspect-square w-full rounded-[1.75rem] object-cover shadow-2xl" />
       </div>
 
       <form onSubmit={submit} className="glass animate-rise-in relative mt-8 w-full max-w-md space-y-4 rounded-3xl p-5 sm:mt-10 sm:max-w-xl sm:space-y-5 sm:p-8">
