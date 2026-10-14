@@ -306,36 +306,6 @@ export type Database = {
         }
         Relationships: []
       }
-      store_release: {
-        Row: {
-          apk_url: string | null
-          build_number: number
-          changelog: string
-          id: number
-          is_mandatory: boolean
-          updated_at: string
-          version: string
-        }
-        Insert: {
-          apk_url?: string | null
-          build_number?: number
-          changelog?: string
-          id?: number
-          is_mandatory?: boolean
-          updated_at?: string
-          version?: string
-        }
-        Update: {
-          apk_url?: string | null
-          build_number?: number
-          changelog?: string
-          id?: number
-          is_mandatory?: boolean
-          updated_at?: string
-          version?: string
-        }
-        Relationships: []
-      }
       user_roles: {
         Row: {
           id: string
