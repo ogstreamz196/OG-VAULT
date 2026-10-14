@@ -139,14 +139,22 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
       const info = await inspectApk(file);
       setApk(info);
       const label = info.label && !info.label.startsWith("@") ? info.label : "";
+      // The build number must match the APK's versionCode: devices compare it against the
+      // installed versionCode. Category, audiences and the rest of the draft are kept as they are.
+      const previous = d.id ? draft.build_number ?? 0 : 0;
+      const build = info.versionCode ?? (d.id ? previous + 1 : d.build_number ?? 1);
       setD((p) => ({
         ...p,
         package_name: info.packageName ?? p.package_name ?? "",
         version: info.versionName ?? p.version ?? "1.0.0",
-        build_number: info.versionCode ?? p.build_number ?? 1,
+        build_number: build,
         title: p.title?.trim() ? p.title : label || p.title,
       }));
-      toast.success(`Detected ${info.packageName ?? "app"} v${info.versionName ?? "?"}`);
+      toast.success(`Detected ${info.packageName ?? "app"} v${info.versionName ?? "?"} (build ${build})`);
+      if (d.id && build <= previous)
+        toast.warning(`This APK's build (${build}) is not higher than the current one (${previous}). Devices won't see it as an update, and Android refuses to install an older build over a newer one.`);
+      if (d.id && draft.package_name && info.packageName && info.packageName !== draft.package_name)
+        toast.warning(`Package changed from ${draft.package_name} to ${info.packageName}. Android will install this as a separate app, not an update.`);
       if (info.icon) {
         try { const u = await uploadMedia("app-media", info.icon); set("icon_url", u); toast.success("App logo taken from the APK"); } catch { /* optional */ }
       } else toast.message("No logo found inside this APK — upload one manually");

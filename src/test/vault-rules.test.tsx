@@ -75,3 +75,25 @@ describe("VIP section", () => {
     expect(afc(apps, media).map((a) => a.id)).toEqual(["1", "2"]);
   });
 });
+
+import { installState } from "@/lib/installed";
+describe("install state from the device", () => {
+  const app = { id: "a", build_number: 12 };
+  it("flags an update when the catalog build is newer than the installed versionCode", () =>
+    expect(installState(app, {}, { installed: true, versionCode: 11, versionName: "1.1" })).toBe("update"));
+  it("is installed when the device already has this build or newer", () =>
+    expect(installState(app, {}, { installed: true, versionCode: 12, versionName: "1.2" })).toBe("installed"));
+  it("ignores a stale ledger entry when the device says the app is gone", () =>
+    expect(installState(app, { a: { version: "1.0", build: 3, at: 0 } }, { installed: false, versionCode: 0, versionName: "" })).toBe("none"));
+  it("falls back to the ledger when the device can't answer", () =>
+    expect(installState(app, { a: { version: "1.0", build: 3, at: 0 } }, null)).toBe("update"));
+});
+
+import { isStoreUpdateAvailable } from "@/lib/store-release";
+describe("store self-update", () => {
+  const release = { build_number: 3, apk_url: "https://example.com/og.vault.apk" };
+  it("offers a newer published build", () => expect(isStoreUpdateAvailable(release, 2)).toBe(true));
+  it("stays quiet on the same or a newer build", () => expect(isStoreUpdateAvailable(release, 3)).toBe(false));
+  it("never offers an update in the browser", () => expect(isStoreUpdateAvailable(release, null)).toBe(false));
+  it("needs an APK to install", () => expect(isStoreUpdateAvailable({ build_number: 3, apk_url: null }, 1)).toBe(false));
+});

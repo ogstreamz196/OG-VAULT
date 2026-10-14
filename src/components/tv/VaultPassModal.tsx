@@ -14,7 +14,7 @@ export function VaultPassModal({ open, onClose }: { open: boolean; onClose: () =
     <div data-nav-scope className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background/95 p-4 sm:items-center sm:p-10">
       <div className="glass relative w-full max-w-xl overflow-hidden rounded-3xl border-vip/50 p-6 text-center sm:grid sm:max-w-3xl sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-8 sm:p-8 sm:text-left">
         <div aria-hidden className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full opacity-40 blur-3xl" style={{ background: "var(--vip)" }} />
-        <button data-nav onClick={onClose} aria-label="Close" className="tv-focus absolute right-4 top-4 z-10 rounded-xl bg-secondary px-4 py-2 text-sm font-semibold">Close ✕</button>
+        <button data-nav data-nav-dismiss onClick={onClose} aria-label="Close" className="tv-focus absolute right-4 top-4 z-10 rounded-xl bg-secondary px-4 py-2 text-sm font-semibold">Close ✕</button>
 
         <div className="relative sm:order-2">
           <div className="relative mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-vip/20 sm:mx-0 sm:h-12 sm:w-12">

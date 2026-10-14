@@ -1,34 +1,47 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { LogOut, Crown } from "lucide-react";
+import { LogOut, Crown, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { catalogQuery } from "@/lib/catalog";
-import { installState, readLedger } from "@/lib/installed";
+import { useInstallStates } from "@/hooks/use-install-states";
 import { Logo } from "./TvShell";
 import { BroadcastBar } from "./BroadcastBar";
 import { MobileDock } from "./MobileDock";
 import { isNative } from "@/lib/native-install";
+import { isStoreUpdateAvailable, runningStoreBuild, storeReleaseQuery } from "@/lib/store-release";
+import { SelfUpdateModal } from "./SelfUpdateModal";
+
+// A required update opens its prompt once per app session.
+let mandatoryPromptShown = false;
 
 const pill = "tv-focus hidden rounded-xl px-5 py-2.5 font-semibold sm:inline-block";
 
 export function StoreHeader() {
   const { username, isVip, isAdmin, level, signOut } = useAuth();
   const { data } = useQuery(catalogQuery);
-  const [updates, setUpdates] = useState(0);
-  useEffect(() => {
-    if (!data) return;
-    const l = readLedger();
-    setUpdates(data.apps.filter((a) => installState(a, l) === "update").length);
-  }, [data]);
+  const stateOf = useInstallStates();
+  const updates = (data?.apps ?? []).filter((a) => stateOf(a) === "update").length;
   const [web, setWeb] = useState(false);
   useEffect(() => setWeb(!isNative()), []);
   const role = isAdmin ? "BOSS" : isVip ? "VIP" : level === "guest" ? "GUEST" : "FREE";
+  const release = useQuery(storeReleaseQuery).data;
+  const running = useQuery({ queryKey: ["store-running-build"], queryFn: runningStoreBuild, staleTime: Infinity }).data;
+  const selfUpdate = isStoreUpdateAvailable(release, running) ? release! : null;
+  const [updateOpen, setUpdateOpen] = useState(false);
+  useEffect(() => {
+    if (selfUpdate?.is_mandatory && !mandatoryPromptShown) { mandatoryPromptShown = true; setUpdateOpen(true); }
+  }, [selfUpdate]);
   return (
     <>
       <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 pt-5 sm:flex sm:flex-wrap sm:justify-between sm:gap-4 sm:px-14 sm:pt-8">
         <Link to="/" data-nav className="tv-focus min-w-0 rounded-lg"><Logo /></Link>
         <nav className="flex shrink-0 items-center gap-2 sm:flex-wrap sm:gap-3">
+          {selfUpdate && (
+            <button data-nav onClick={() => setUpdateOpen(true)} className="tv-focus update-glow flex items-center gap-1.5 rounded-full border border-glow bg-glow/15 px-3 py-2 text-sm font-bold text-glow sm:px-5 sm:py-2.5 sm:text-base">
+              <Zap className="h-4 w-4" /><span className="hidden sm:inline">Update Available (v{selfUpdate.version})</span><span className="sm:hidden">Update</span>
+            </button>
+          )}
           <Link data-nav to="/" className={`${pill} text-muted-foreground`} activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
           <Link data-nav to="/search" className={`${pill} text-muted-foreground`} activeProps={{ className: "text-foreground" }}>🔍 Search</Link>
           <Link data-nav to="/updates" className={`${pill} ${updates ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>Updates{updates ? ` (${updates})` : ""}</Link>
@@ -52,6 +65,7 @@ export function StoreHeader() {
       </div>
       <div className="px-4 pt-4 sm:px-14"><BroadcastBar /></div>
       <MobileDock updates={updates} />
+      {updateOpen && selfUpdate && <SelfUpdateModal release={selfUpdate} onClose={() => setUpdateOpen(false)} />}
     </>
   );
 }

@@ -85,6 +85,13 @@
       "when": 1791674454842,
       "tag": "0011_guest_apps_for_everyone",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791976308480,
+      "tag": "0012_store_release",
+      "breakpoints": true
     }
   ]
 }

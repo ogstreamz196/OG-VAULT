@@ -165,3 +165,11 @@
   box-shadow: 0 -10px 40px -12px color-mix(in oklab, var(--primary) 50%, transparent);
   backdrop-filter: blur(16px);
 }
+
+/* Pulsing cyan halo for "update available" actions. drop-shadow leaves box-shadow free for the focus ring. */
+@keyframes update-glow {
+  0%, 100% { filter: drop-shadow(0 0 3px var(--glow)); }
+  50% { filter: drop-shadow(0 0 14px var(--glow)); }
+}
+@utility update-glow { animation: update-glow 1.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .update-glow { animation: none; filter: drop-shadow(0 0 8px var(--glow)); } }

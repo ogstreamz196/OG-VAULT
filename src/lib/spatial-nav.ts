@@ -1,5 +1,6 @@
 // D-pad / remote spatial navigation. Any element with [data-nav] is a focus target.
-// A [data-nav-scope] element (a modal) traps navigation while it is on screen.
+// A [data-nav-scope] element (a modal) traps navigation while it is on screen; Back clicks its
+// [data-nav-dismiss] button if it has one.
 export type Dir = "up" | "down" | "left" | "right";
 
 const KEY_DIR: Record<string, Dir> = {
@@ -154,7 +155,12 @@ export function installSpatialNav(onBack: BackHandler): () => void {
     if (!settled && el !== active) focusEl(el);
   };
 
-  const back = (): "handled" | "exit" => (onBack() === false ? "exit" : "handled");
+  const back = (): "handled" | "exit" => {
+    // An open modal with a dismiss button closes first, wherever it lives on the page.
+    const dismiss = currentScope().querySelector<HTMLElement>("[data-nav-dismiss]");
+    if (dismiss && currentScope() !== document.body) { dismiss.click(); return "handled"; }
+    return onBack() === false ? "exit" : "handled";
+  };
 
   const handler = (e: KeyboardEvent) => {
     const active = document.activeElement as HTMLElement | null;

@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { catalogQuery, type AppRow } from "@/lib/catalog";
-import { installState, readLedger } from "@/lib/installed";
+import { catalogQuery } from "@/lib/catalog";
+import { useInstallStates } from "@/hooks/use-install-states";
 import { StoreGate } from "@/components/tv/StoreGate";
 import { StoreHeader } from "@/components/tv/StoreHeader";
 import { AppTile } from "@/components/tv/AppTile";
@@ -23,15 +22,12 @@ export const Route = createFileRoute("/updates")({
 
 function Updates() {
   const { data } = useQuery(catalogQuery);
-  const [lists, setLists] = useState<{ updates: AppRow[]; installed: AppRow[] }>({ updates: [], installed: [] });
-  useEffect(() => {
-    if (!data) return;
-    const ledger = readLedger();
-    setLists({
-      updates: data.apps.filter((a) => installState(a, ledger) === "update"),
-      installed: data.apps.filter((a) => installState(a, ledger) === "installed"),
-    });
-  }, [data]);
+  const stateOf = useInstallStates();
+  const apps = data?.apps ?? [];
+  const lists = {
+    updates: apps.filter((a) => stateOf(a) === "update"),
+    installed: apps.filter((a) => stateOf(a) === "installed"),
+  };
 
   return (
     <div className="pb-20">
