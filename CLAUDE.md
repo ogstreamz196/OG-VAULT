@@ -78,8 +78,9 @@ The system strictly enforces a 4-tier hierarchy across the database (RLS `can_br
   - Master copy of ADB Bridge is at `native/android/AdbBridgePlugin.java` — any changes must be mirrored to `android/app/src/main/java/og/vault/AdbBridgePlugin.java`.
 - **Permissions:** `QUERY_ALL_PACKAGES` is present in `AndroidManifest.xml` so the store can detect if target apps are installed locally and show "Open App" or "Re-install".
 - **Artwork Assets:**
-  - TV Banner: `drawable/tv_banner.png` (320x180) and `drawable-xhdpi/tv_banner.png` (640x360). Full uncropped wide metallic vault door artwork.
+  - TV Banner: `drawable/tv_banner.png` (320x180) and `drawable-xhdpi/tv_banner.png` (640x360). The full, uncropped OG VAULT logo centred over a blurred, dimmed copy of itself.
   - Launcher Icons & Splashes: Generated with padded safe zones over `#040714` background without cropping the artwork.
+  - All logo assets (icons, splashes, banners, favicon, in-app `/og-vault-logo.webp`) come from `scripts/brand/og-vault-logo-source.png`; to change the logo, replace it and run `python3 scripts/brand/generate-logo-assets.py scripts/brand/og-vault-logo-source.png .`.
 - **APK Install Flow (`src/lib/native-install.ts`):**
   - Native: Downloads APK to cache via `Filesystem.downloadFile`, triggers installer via `FileOpener.open` with `application/vnd.android.package-archive`.
   - Web: Falls back to direct browser download.
