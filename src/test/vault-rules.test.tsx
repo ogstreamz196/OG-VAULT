@@ -88,3 +88,12 @@ describe("install state from the device", () => {
   it("falls back to the ledger when the device can't answer", () =>
     expect(installState(app, { a: { version: "1.0", build: 3, at: 0 } }, null)).toBe("update"));
 });
+
+import { isStoreUpdateAvailable } from "@/lib/store-release";
+describe("store self-update", () => {
+  const release = { build_number: 3, apk_url: "https://example.com/og.vault.apk" };
+  it("offers a newer published build", () => expect(isStoreUpdateAvailable(release, 2)).toBe(true));
+  it("stays quiet on the same or a newer build", () => expect(isStoreUpdateAvailable(release, 3)).toBe(false));
+  it("never offers an update in the browser", () => expect(isStoreUpdateAvailable(release, null)).toBe(false));
+  it("needs an APK to install", () => expect(isStoreUpdateAvailable({ build_number: 3, apk_url: null }, 1)).toBe(false));
+});

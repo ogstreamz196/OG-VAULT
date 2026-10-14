@@ -12,6 +12,7 @@ import { R2StorageCard } from "@/components/admin/R2StorageCard";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { RemoteActionsManager } from "@/components/admin/RemoteActionsManager";
 import { BroadcastCard } from "@/components/admin/BroadcastCard";
+import { StoreReleaseCard } from "@/components/admin/StoreReleaseCard";
 import { isNative } from "@/lib/native-install";
 
 export const Route = createFileRoute("/admin")({
@@ -70,6 +71,7 @@ function AdminPage() {
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="remote">Remote Tools</TabsTrigger>
+            <TabsTrigger value="store-updates">Store Updates</TabsTrigger>
           </TabsList>
           <TabsContent value="apps" className="space-y-6"><BroadcastCard /><R2StorageCard /><AppsManager editId={Route.useSearch().edit} /></TabsContent>
           <TabsContent value="categories"><CategoriesManager /></TabsContent>
@@ -77,6 +79,7 @@ function AdminPage() {
           <TabsContent value="members"><MembersManager /></TabsContent>
           <TabsContent value="analytics"><AnalyticsDashboard /></TabsContent>
           <TabsContent value="remote"><RemoteActionsManager /></TabsContent>
+          <TabsContent value="store-updates"><StoreReleaseCard /></TabsContent>
         </Tabs>
       </main>
     </div>

@@ -227,7 +227,7 @@ function AppDetail() {
         {shot && (
           <div data-nav-scope className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-10">
             <img src={shot} alt="" className="max-h-[85vh] max-w-full rounded-2xl" />
-            <button data-nav data-nav-autofocus autoFocus onClick={() => setShot(null)} className="tv-focus absolute right-10 top-10 rounded-xl bg-secondary px-5 py-2.5 font-semibold">Close</button>
+            <button data-nav data-nav-autofocus data-nav-dismiss autoFocus onClick={() => setShot(null)} className="tv-focus absolute right-10 top-10 rounded-xl bg-secondary px-5 py-2.5 font-semibold">Close</button>
           </div>
         )}
         <VaultPassModal open={passOpen} onClose={() => setPassOpen(false)} />
