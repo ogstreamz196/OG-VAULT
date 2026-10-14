@@ -16,7 +16,7 @@ The repository is connected via Git. You have full permission to analyze files, 
   - Focus glow (TV remote cursor): `#66CCF9` (Cyan glow + scale)
   - VIP / Locked: `#DC2626` (Crimson)
   - Text: `#F1F5F9` / `#94A3B8`
-- **Native Wrapper:** Capacitor 7 with a fully configured Android project in `/android/`.
+- **Native Wrapper:** Capacitor 8 with a fully configured Android project in `/android/`.
 - **Storage:** Cloudflare R2 bucket (`download.fireunlock.co.uk`) via S3 presigned PUT URLs (`src/lib/r2.functions.ts`), falling back to built-in backend storage.
 - **AI Copy:** Direct Groq API calls using `GROQ_API_KEY` (`src/lib/ai-copy.functions.ts`) to avoid external platform credit usage.
 - **Live Production URL:** `https://vault.ogstreamz.co.uk` (The native app's `server.url` points here; preview URLs return 401 on devices).
@@ -55,9 +55,10 @@ The system strictly enforces a 4-tier hierarchy across the database (RLS `can_br
   - Syncs every 15 minutes via cron route (`src/routes/api/public/vault-sync-cron.ts`) and manual "Sync now" button.
   - Generates auth password via SHA-256 HMAC of username with `VAULT_AUTH_SECRET`.
   - Anyone authenticating with an active Vault Pass automatically receives VIP status.
-- **M3U Login Fallback:**
-  - Authenticates against player API (`player_api.php`) server-side with a 6-second timeout.
-  - M3U users are classified as Free tier. No playlist or VOD data is ever stored.
+- **Streaming Account Sign-in (fallback):**
+  - If the username/password is not an active Vault Pass, it is checked server-side against the streaming provider's account API (`src/lib/account-auth.server.ts`, 6-second timeout).
+  - Accounts that pass are signed in as Free tier. Authentication only: nothing else from the account is ever stored.
+  - Their store accounts use the internal `m3u.<username>` address prefix; never change it or existing users lose their accounts.
 
 ---
 

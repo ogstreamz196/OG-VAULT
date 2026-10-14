@@ -1,9 +1,9 @@
-// Xtream/M3U login check — authentication only, nothing from the playlist is stored.
+// Streaming account sign-in check — authentication only, nothing else from the account is stored.
 const HOST = "http://xiu96ctyh6-system.xyz";
 
-export type M3uResult = "active" | "expired" | "invalid" | "unreachable";
+export type AccountResult = "active" | "expired" | "invalid" | "unreachable";
 
-export async function checkM3u(username: string, password: string): Promise<M3uResult> {
+export async function checkStreamAccount(username: string, password: string): Promise<AccountResult> {
   const url = `${HOST}/player_api.php?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(6000) });

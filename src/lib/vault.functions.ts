@@ -112,12 +112,13 @@ export const vaultSignIn = createServerFn({ method: "POST" })
       return { ok: true as const, email: acc.email, token: acc.authPw };
     }
 
-    // 2) M3U / Xtream account → Free member (auth only, no playlist data kept)
-    const { checkM3u } = await import("@/lib/m3u-auth.server");
-    const m3u = await checkM3u(data.username.trim(), data.password);
-    if (m3u === "expired") return { ok: false as const, error: "Account expired" };
-    if (m3u === "unreachable") return { ok: false as const, error: "Could not reach the login server, try again" };
-    if (m3u !== "active") return { ok: false as const, error: "Account does not exist or password is wrong" };
+    // 2) Streaming account → Free member (auth only, nothing else from the account is kept)
+    const { checkStreamAccount } = await import("@/lib/account-auth.server");
+    const account = await checkStreamAccount(data.username.trim(), data.password);
+    if (account === "expired") return { ok: false as const, error: "Account expired" };
+    if (account === "unreachable") return { ok: false as const, error: "Could not reach the login server, try again" };
+    if (account !== "active") return { ok: false as const, error: "Account does not exist or password is wrong" };
+    // The "m3u." prefix is part of existing users' account addresses; changing it would orphan them.
     const local = "m3u." + data.username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "-").slice(0, 60);
     const acc = await openAccount(local);
     if (!acc) return { ok: false as const, error: "Could not open your account" };
