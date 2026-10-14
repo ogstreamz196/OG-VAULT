@@ -19,7 +19,7 @@ export const Route = createFileRoute("/search")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <StoreGate onBack={() => {}}><Search /></StoreGate>,
+  component: () => <StoreGate><Search /></StoreGate>,
 });
 
 const KEYS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".split("");
@@ -43,8 +43,8 @@ function Search() {
       <div className="px-4 sm:px-14 pt-8 space-y-6">
         <input data-nav value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search apps or categories…" className="tv-focus w-full rounded-2xl border border-border bg-card px-6 py-4 text-2xl" />
         <div className="hidden sm:grid grid-cols-12 gap-2 max-w-4xl">
-          {KEYS.map((k) => (
-            <button data-nav key={k} onClick={() => setQ((s) => s + k.toLowerCase())} className="tv-focus rounded-lg bg-secondary py-3 text-xl font-bold">{k}</button>
+          {KEYS.map((k, i) => (
+            <button data-nav data-nav-autofocus={i === 0 || undefined} key={k} onClick={() => setQ((s) => s + k.toLowerCase())} className="tv-focus rounded-lg bg-secondary py-3 text-xl font-bold">{k}</button>
           ))}
           <button data-nav onClick={() => setQ((s) => s + " ")} className="tv-focus col-span-4 rounded-lg bg-secondary py-3 font-bold">Space</button>
           <button data-nav onClick={() => setQ((s) => s.slice(0, -1))} className="tv-focus col-span-4 rounded-lg bg-secondary py-3 font-bold">⌫ Delete</button>

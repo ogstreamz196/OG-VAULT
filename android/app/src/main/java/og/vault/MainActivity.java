@@ -2,6 +2,8 @@ package og.vault;
 
 import android.os.Bundle;
 import android.webkit.WebSettings;
+import android.webkit.WebView;
+import androidx.activity.OnBackPressedCallback;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -21,5 +23,28 @@ public class MainActivity extends BridgeActivity {
             settings.setUseWideViewPort(true);
             settings.setLoadWithOverviewMode(true);
         }
+        // Fire TV Back button: let the store close popups and step back through its screens.
+        // The store answers "exit" on Home / sign-in; only then does Back leave the app.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (getBridge() == null || getBridge().getWebView() == null) {
+                    finish();
+                    return;
+                }
+                WebView webView = getBridge().getWebView();
+                getBridge().eval(
+                    "(function(){try{return window.__ogVaultBack?window.__ogVaultBack():'none'}catch(e){return 'none'}})()",
+                    result -> {
+                        if ("\"handled\"".equals(result)) return;
+                        if (!"\"exit\"".equals(result) && webView.canGoBack()) {
+                            webView.goBack();
+                            return;
+                        }
+                        finish();
+                    }
+                );
+            }
+        });
     }
 }

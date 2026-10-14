@@ -52,6 +52,18 @@ describe("spatial navigation", () => {
     expect(pickNext(from, [{ x: 300, y: 0, w: 100, h: 100 }, { x: 120, y: 0, w: 100, h: 100 }], "right")).toBe(1));
   it("moves down to the next row", () => expect(pickNext(from, [{ x: 120, y: 0, w: 100, h: 100 }, { x: 0, y: 200, w: 100, h: 100 }], "down")).toBe(1));
   it("returns -1 at an edge", () => expect(pickNext(from, [{ x: 120, y: 0, w: 100, h: 100 }], "left")).toBe(-1));
+  it("moves up to the banner button above a tile instead of skipping to the header", () => {
+    const tile = { x: 400, y: 400, w: 160, h: 200 };
+    const header = { x: 420, y: 10, w: 80, h: 30 };
+    const heroButton = { x: 60, y: 300, w: 120, h: 40 };
+    expect(pickNext(tile, [header, heroButton], "up")).toBe(1);
+  });
+  it("stays on the same row when moving right", () => {
+    const tile = { x: 0, y: 100, w: 100, h: 100 };
+    const below = { x: 110, y: 205, w: 100, h: 100 };
+    const sameRow = { x: 400, y: 100, w: 100, h: 100 };
+    expect(pickNext(tile, [below, sameRow], "right")).toBe(1);
+  });
 });
 
 import { appsForCategory as afc } from "@/lib/access";

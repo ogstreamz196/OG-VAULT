@@ -11,6 +11,7 @@
 
 ## OG VAULT architecture
 - Store client (`/`, `/app/$id`) is a 10-foot TV UI; every remote-focusable element carries `data-nav` and is driven by `src/lib/spatial-nav.ts` — keeps D-pad navigation generic instead of per-screen handlers.
+- Remote Back: `MainActivity` forwards the Fire TV Back button to `window.__ogVaultBack` (set by `TvShell`), which closes any `data-nav-scope` modal, then steps back a screen; it answers "exit" only on Home/sign-in so Back never quits mid-store. Focus restores to the last-used tile per page, and the root font scales to a 1280x720 canvas so 960x540 Firestick viewports fit.
 - Store users have real accounts: username + password mapped to a synthetic `<username>@users.ogvault.app` address (auto-confirm on, no email delivery) — keeps remote sign-in to two fields.
 - App visibility is `apps.audiences` (guest/free/vip/boss) enforced by RLS via `can_browse_app()`; browse vs download split in `src/lib/access.ts` (canSeeApp / canDownloadApp). Categories with `is_boss` are hidden from non-admins — keeps one source of truth per tier.
 - VIP status is a `vip_members` row (granted by redeeming a code via `redeem_vip_for_me` or by the boss); `is_vip()` is the single check. Categories with `is_vip` render locked for non-VIP.

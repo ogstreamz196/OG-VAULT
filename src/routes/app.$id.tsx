@@ -55,7 +55,8 @@ function AppDetail() {
   const back = () => {
     if (passOpen) return setPassOpen(false);
     if (shot) return setShot(null);
-    router.navigate({ to: "/" });
+    if (router.history.canGoBack()) router.history.back();
+    else router.navigate({ to: "/" });
   };
 
   async function install() {
@@ -84,7 +85,7 @@ function AppDetail() {
   }
 
   if (!ready) return <BrandLoader />;
-  if (!user) return <TvShell key="signin" onBack={() => {}}><SignIn /></TvShell>;
+  if (!user) return <TvShell key="signin" onBack={() => false}><SignIn /></TvShell>;
   if (isLoading)
     return (
       <TvShell>

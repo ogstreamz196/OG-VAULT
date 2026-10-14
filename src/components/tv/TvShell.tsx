@@ -1,22 +1,27 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "@tanstack/react-router";
-import { focusFirst, installSpatialNav } from "@/lib/spatial-nav";
+import { installSpatialNav, type BackHandler } from "@/lib/spatial-nav";
 import vaultEmblem from "@/assets/vault-emblem.webp.asset.json";
 import brandLogo from "@/assets/og-streamz-brand.webp.asset.json";
 
-export function TvShell({ children, onBack }: { children: ReactNode; onBack?: (() => void) | undefined }) {
+/**
+ * Wraps every store screen with remote navigation. Back runs `onBack` when given; otherwise it
+ * steps back through the store and returns to Home, and returns false on Home so the native
+ * app exits (Fire TV convention).
+ */
+export function TvShell({ children, onBack }: { children: ReactNode; onBack?: BackHandler | undefined }) {
   const router = useRouter();
+  // Install once per screen; a fresh onBack each render must not reset focus handling.
+  const backRef = useRef(onBack);
+  backRef.current = onBack;
   useEffect(() => {
-    const off = installSpatialNav(() => {
-      if (onBack) onBack();
-      else if (window.history.length > 1) router.history.back();
+    return installSpatialNav(() => {
+      if (backRef.current) return backRef.current();
+      if (window.location.pathname === "/") return false;
+      if (router.history.canGoBack()) router.history.back();
+      else router.navigate({ to: "/" });
     });
-    const t = setTimeout(focusFirst, 120);
-    return () => {
-      off();
-      clearTimeout(t);
-    };
-  }, [onBack, router]);
+  }, [router]);
   return <div className="min-h-screen bg-background pb-24 text-foreground overflow-x-hidden sm:pb-0">{children}</div>;
 }
 

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/updates")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <StoreGate onBack={() => {}}><Updates /></StoreGate>,
+  component: () => <StoreGate><Updates /></StoreGate>,
 });
 
 function Updates() {
@@ -39,7 +39,7 @@ function Updates() {
       <section className="mt-10 px-4 sm:px-14">
         <h1 className="text-3xl font-black text-glow">Updates available ({lists.updates.length})</h1>
         {lists.updates.length ? (
-          <div className="mt-6 flex flex-wrap gap-6">{lists.updates.map((a) => <AppTile key={a.id} app={a} />)}</div>
+          <div className="mt-6 flex flex-wrap gap-6">{lists.updates.map((a, i) => <AppTile key={a.id} app={a} autoFocus={i === 0} />)}</div>
         ) : (
           <p className="mt-4 text-xl text-muted-foreground">All your apps are up to date.</p>
         )}
@@ -47,9 +47,9 @@ function Updates() {
       <section className="mt-12 px-4 sm:px-14">
         <h2 className="text-2xl font-bold">Installed from 0G VAULT ({lists.installed.length})</h2>
         {lists.installed.length ? (
-          <div className="mt-6 flex flex-wrap gap-6">{lists.installed.map((a) => <AppTile key={a.id} app={a} />)}</div>
+          <div className="mt-6 flex flex-wrap gap-6">{lists.installed.map((a, i) => <AppTile key={a.id} app={a} autoFocus={i === 0 && !lists.updates.length} />)}</div>
         ) : (
-          <p className="mt-4 text-lg text-muted-foreground">Nothing installed yet. <Link data-nav to="/" className="tv-focus rounded text-glow">Browse the store</Link></p>
+          <p className="mt-4 text-lg text-muted-foreground">Nothing installed yet. <Link data-nav data-nav-autofocus={!lists.updates.length || undefined} to="/" className="tv-focus rounded text-glow">Browse the store</Link></p>
         )}
       </section>
     </div>
