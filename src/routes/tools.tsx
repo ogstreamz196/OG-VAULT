@@ -21,7 +21,7 @@ export const Route = createFileRoute("/tools")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: () => <StoreGate onBack={() => {}}><Tools /></StoreGate>,
+  component: () => <StoreGate><Tools /></StoreGate>,
 });
 
 type Status = "off" | "connecting" | "on";
@@ -135,7 +135,7 @@ function Tools() {
       </div>
 
       {actions.some((a) => a.needs_package) && (
-        <select value={pkg} onChange={(e) => setPkg(e.target.value)} className="w-full rounded-xl border border-border bg-card px-4 py-3">
+        <select data-nav value={pkg} onChange={(e) => setPkg(e.target.value)} className="tv-focus w-full rounded-xl border border-border bg-card px-4 py-3">
           <option value="">Pick an app for app-specific buttons…</option>
           {packages.map((p) => <option key={p} value={p}>{p}</option>)}
         </select>

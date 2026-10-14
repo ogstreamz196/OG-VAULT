@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { catalogQuery } from "@/lib/catalog";
 import { appsForCategory } from "@/lib/access";
@@ -23,9 +23,8 @@ export const Route = createFileRoute("/category/$slug")({
 });
 
 function CategoryPage() {
-  const router = useRouter();
   return (
-    <StoreGate onBack={() => router.navigate({ to: "/" })}>
+    <StoreGate>
       <CategoryBody />
     </StoreGate>
   );
@@ -51,7 +50,7 @@ function CategoryBody() {
             <h1 className={`text-3xl sm:text-5xl font-extrabold ${cat.is_vip ? "text-vip" : ""}`}>{cat.name}</h1>
             {cat.is_vip && !isVip && <div className="pt-8"><VipLock title={cat.name} /></div>}
             {apps.length ? (
-              <div className="flex flex-wrap gap-6 py-8">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
+              <div className="flex flex-wrap gap-6 py-8">{apps.map((a, i) => <AppTile key={a.id} app={a} autoFocus={i === 0 && !(cat.is_vip && !isVip)} />)}</div>
             ) : (
               <p className="pt-8 text-2xl text-muted-foreground">No apps here yet — check back soon.</p>
             )}
