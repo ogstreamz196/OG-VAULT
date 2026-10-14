@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
 import { canDownloadApp as canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { AppRow } from "@/lib/catalog";
-import { installState, type InstallState } from "@/lib/installed";
+import { useInstallStates } from "@/hooks/use-install-states";
 import { AppIcon, TierBadge } from "./TvShell";
 
 export function AppTile({ app, autoFocus = false }: { app: AppRow; autoFocus?: boolean }) {
-  const [state, setState] = useState<InstallState>("none");
-  useEffect(() => setState(installState(app)), [app]);
+  const state = useInstallStates()(app);
   const { level } = useAuth();
   const locked = !canSeeApp(level, app.audiences);
   const cat = (app as { categories?: { name: string } | null }).categories?.name;
@@ -18,7 +16,7 @@ export function AppTile({ app, autoFocus = false }: { app: AppRow; autoFocus?: b
       <div aria-hidden className="pointer-events-none absolute -top-10 left-1/2 h-24 w-32 -translate-x-1/2 rounded-full opacity-40 blur-2xl transition-opacity group-focus:opacity-90" style={{ background: "var(--glow)" }} />
       {state !== "none" && (
         <span className={`absolute right-2 top-2 z-10 rounded-md px-2 py-0.5 text-[10px] font-extrabold sm:text-xs ${state === "update" ? "animate-pulse bg-glow text-background" : "bg-secondary text-muted-foreground"}`}>
-          {state === "update" ? "UPDATE" : "INSTALLED"}
+          {state === "update" ? "UPDATE AVAILABLE" : "INSTALLED"}
         </span>
       )}
       <div className="relative">

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { LogOut, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { catalogQuery } from "@/lib/catalog";
-import { installState, readLedger } from "@/lib/installed";
+import { useInstallStates } from "@/hooks/use-install-states";
 import { Logo } from "./TvShell";
 import { BroadcastBar } from "./BroadcastBar";
 import { MobileDock } from "./MobileDock";
@@ -15,12 +15,8 @@ const pill = "tv-focus hidden rounded-xl px-5 py-2.5 font-semibold sm:inline-blo
 export function StoreHeader() {
   const { username, isVip, isAdmin, level, signOut } = useAuth();
   const { data } = useQuery(catalogQuery);
-  const [updates, setUpdates] = useState(0);
-  useEffect(() => {
-    if (!data) return;
-    const l = readLedger();
-    setUpdates(data.apps.filter((a) => installState(a, l) === "update").length);
-  }, [data]);
+  const stateOf = useInstallStates();
+  const updates = (data?.apps ?? []).filter((a) => stateOf(a) === "update").length;
   const [web, setWeb] = useState(false);
   useEffect(() => setWeb(!isNative()), []);
   const role = isAdmin ? "BOSS" : isVip ? "VIP" : level === "guest" ? "GUEST" : "FREE";

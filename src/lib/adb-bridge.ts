@@ -12,8 +12,11 @@ interface AdbBridgePlugin {
   openAppSettings(o: { package: string }): Promise<void>;
   isTv(): Promise<{ tv: boolean }>;
   isInstalled(o: { package: string }): Promise<{ installed: boolean }>;
+  getPackageVersion(o: { package: string }): Promise<PackageVersion>;
   addListener(e: "installProgress", cb: (d: { stage: "download" | "push"; pct: number }) => void): Promise<PluginListenerHandle>;
 }
+
+export type PackageVersion = { installed: boolean; versionCode: number; versionName: string };
 
 const Native = registerPlugin<AdbBridgePlugin>("AdbBridge");
 
@@ -106,4 +109,23 @@ export async function isTvDevice(): Promise<boolean> {
 export async function isLocallyInstalled(pkg: string): Promise<boolean | null> {
   if (!isNativeAdb() || !isValidPackage(pkg)) return null;
   try { return (await Native.isInstalled({ package: pkg })).installed; } catch { return null; }
+}
+
+/**
+ * Real installed version from this device's PackageManager; null when it can't be known
+ * (browser, or an older APK built before getPackageVersion existed).
+ */
+export async function devicePackageVersion(pkg: string): Promise<PackageVersion | null> {
+  if (!isNativeAdb() || !isValidPackage(pkg)) return null;
+  try {
+    const r = await Native.getPackageVersion({ package: pkg });
+    return { installed: !!r.installed, versionCode: Number(r.versionCode) || 0, versionName: r.versionName ?? "" };
+  } catch {
+    return null;
+  }
+}
+
+/** Installed version of a package; in the browser this simulates "not installed". */
+export async function getPackageVersion(pkg: string): Promise<PackageVersion> {
+  return (await devicePackageVersion(pkg)) ?? { installed: false, versionCode: 0, versionName: "" };
 }

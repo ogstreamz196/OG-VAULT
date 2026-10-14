@@ -174,4 +174,27 @@ public class AdbBridgePlugin extends Plugin {
         catch (Exception e) { ok = false; }
         JSObject r = new JSObject(); r.put("installed", ok); call.resolve(r);
     }
+
+    /** Installed version of a package on this device, compared against the catalog build_number. */
+    @PluginMethod
+    public void getPackageVersion(PluginCall call) {
+        String pkg = call.getString("package");
+        try {
+            android.content.pm.PackageInfo info = getContext().getPackageManager().getPackageInfo(pkg, 0);
+            long versionCode = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P
+                ? info.getLongVersionCode()
+                : (long) info.versionCode;
+            JSObject r = new JSObject();
+            r.put("installed", true);
+            r.put("versionCode", versionCode);
+            r.put("versionName", info.versionName != null ? info.versionName : "");
+            call.resolve(r);
+        } catch (Exception e) {
+            JSObject r = new JSObject();
+            r.put("installed", false);
+            r.put("versionCode", 0);
+            r.put("versionName", "");
+            call.resolve(r);
+        }
+    }
 }

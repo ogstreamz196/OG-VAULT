@@ -2,14 +2,14 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { BrandLoader } from "@/components/tv/BrandLoader";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { installState, recordInstall, type InstallState } from "@/lib/installed";
+import { installState, readLedger, recordInstall, type InstallState } from "@/lib/installed";
 import { appQuery } from "@/lib/catalog";
 import { canDownloadApp as canSeeApp, tierFromAudiences } from "@/lib/access";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/components/tv/SignIn";
 import { downloadAndInstallApk, isNative } from "@/lib/native-install";
 import { logInstallEvent } from "@/lib/telemetry";
-import { isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, type PushStage } from "@/lib/adb-bridge";
+import { devicePackageVersion, isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 import { VaultPassModal } from "@/components/tv/VaultPassModal";
 import { Lock } from "lucide-react";
@@ -39,18 +39,32 @@ function AppDetail() {
   const [inst, setInst] = useState<InstallState>("none");
   const [pushing, setPushing] = useState<{ stage: PushStage; pct: number } | null>(null);
   const [onTv, setOnTv] = useState(false);
-  const [onDevice, setOnDevice] = useState<boolean | null>(null);
   const [passOpen, setPassOpen] = useState(false);
-  useEffect(() => { if (app) setInst(installState(app)); }, [app]);
-  useEffect(() => { isTvDevice().then(setOnTv); }, []);
+  const [nativeAdb, setNativeAdb] = useState(false);
+  useEffect(() => { setNativeAdb(isNativeAdb()); isTvDevice().then(setOnTv); }, []);
+  // Real installed version from the device; re-read when the user returns from the installer.
+  const device = useQuery({
+    queryKey: ["device-version", app?.package_name],
+    enabled: nativeAdb && !!app?.package_name,
+    staleTime: 5_000,
+    refetchOnWindowFocus: "always",
+    queryFn: () => devicePackageVersion(app!.package_name!),
+  });
+  // Older APKs can only say installed / not installed.
+  const [legacyOnDevice, setLegacyOnDevice] = useState<boolean | null>(null);
   useEffect(() => {
-    if (!app?.package_name) return;
-    isLocallyInstalled(app.package_name).then((r) => {
-      setOnDevice(r);
-      if (r === true) setInst((s) => (s === "none" ? "installed" : s));
-      if (r === false) setInst("none");
-    });
-  }, [app, progress]);
+    if (!app?.package_name || device.data !== null) return;
+    isLocallyInstalled(app.package_name).then(setLegacyOnDevice);
+  }, [app, device.data, progress]);
+  const [ledgerTick, setLedgerTick] = useState(0);
+  useEffect(() => {
+    if (!app) return;
+    let s = installState(app, readLedger(), device.data ?? null);
+    if (!device.data && legacyOnDevice === true && s === "none") s = "installed";
+    if (!device.data && legacyOnDevice === false) s = "none";
+    setInst(s);
+  }, [app, device.data, legacyOnDevice, ledgerTick]);
+  const onDevice = device.data ? device.data.installed : legacyOnDevice;
 
   const back = () => {
     if (passOpen) return setPassOpen(false);
@@ -73,7 +87,8 @@ function AppDetail() {
       if (r === "installed") logInstallEvent(app.id, user?.id, "install_prompted");
       else if (!downloaded) logInstallEvent(app.id, user?.id, "download_completed");
       recordInstall(app);
-      setInst("installed");
+      setLedgerTick((t) => t + 1);
+      void device.refetch();
       setStatus(r === "installed" ? "Installer opened — confirm on screen." : "Download complete.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Download failed";
@@ -127,6 +142,11 @@ function AppDetail() {
               <p className="text-lg text-muted-foreground">
                 Version {app.version} · Build {app.build_number}{app.file_size ? ` · ${app.file_size}` : ""}{app.package_name ? ` · ${app.package_name}` : ""}
               </p>
+              {device.data?.installed && (
+                <p className={`text-base font-semibold ${inst === "update" ? "text-glow" : "text-muted-foreground"}`}>
+                  {inst === "update" ? "UPDATE AVAILABLE · " : ""}On this device: v{device.data.versionName || "?"} (build {device.data.versionCode})
+                </p>
+              )}
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 {isAdmin && !isNative() && (
@@ -134,12 +154,12 @@ function AppDetail() {
                 )}
                 {allowed ? (
                   <>
-                    <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className="tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70">
-                      {progress !== null ? `Downloading ${progress}%` : inst === "update" ? "Update available — Install" : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
+                    <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className={`tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70 ${inst === "update" && progress === null ? "update-glow" : ""}`}>
+                      {progress !== null ? `Downloading ${progress}%` : inst === "update" ? `Update to v${app.version}` : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
                     </button>
-                    {(onDevice ?? inst !== "none") && app.package_name && isNativeAdb() && (
+                    {(onDevice ?? inst !== "none") && app.package_name && nativeAdb && (
                       <>
-                        <button data-nav onClick={() => launchLocalApp(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Open App</button>
+                        {inst !== "update" && <button data-nav onClick={() => launchLocalApp(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Open App</button>}
                         <button data-nav onClick={() => openLocalAppSettings(app.package_name!).catch((e) => setStatus(e.message))} className="tv-focus rounded-xl bg-secondary px-6 py-4 text-lg font-semibold">Manage in Settings</button>
                       </>
                     )}

@@ -1,5 +1,7 @@
-// Device-local install ledger used for "UPDATE" / "INSTALLED" badges.
+// Install state for "UPDATE" / "INSTALLED" badges. On the APK the device's real installed
+// version (PackageManager versionCode) decides; in the browser a device-local ledger does.
 import type { AppRow } from "@/lib/catalog";
+import type { PackageVersion } from "@/lib/adb-bridge";
 
 type Entry = { version: string; build: number; at: number };
 const KEY = "ogvault.installed";
@@ -16,7 +18,8 @@ export function recordInstall(app: Pick<AppRow, "id" | "version" | "build_number
 }
 
 export type InstallState = "none" | "installed" | "update";
-export function installState(app: Pick<AppRow, "id" | "build_number">, ledger = read()): InstallState {
+export function installState(app: Pick<AppRow, "id" | "build_number">, ledger = read(), device?: PackageVersion | null): InstallState {
+  if (device) return !device.installed ? "none" : app.build_number > device.versionCode ? "update" : "installed";
   const e = ledger[app.id];
   if (!e) return "none";
   return app.build_number > e.build ? "update" : "installed";
