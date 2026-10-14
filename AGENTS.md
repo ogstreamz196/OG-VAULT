@@ -16,7 +16,7 @@
 - App visibility is `apps.audiences` (guest/free/vip/boss) enforced by RLS via `can_browse_app()`; browse vs download split in `src/lib/access.ts` (canSeeApp / canDownloadApp). Categories with `is_boss` are hidden from non-admins — keeps one source of truth per tier.
 - VIP status is a `vip_members` row (granted by redeeming a code via `redeem_vip_for_me` or by the boss); `is_vip()` is the single check. Categories with `is_vip` render locked for non-VIP.
 - vip_codes is admin-only under RLS; codes are redeemed only through security-definer RPCs.
-- Playlist (M3U/Xtream) login was removed; `m3u_settings` table and `redeem_vip_code` RPC are unused leftovers.
+- Sign-in falls back to a streaming account check (`src/lib/account-auth.server.ts`, auth only, Free tier) when the login is not an active Vault Pass; those users keep the internal `m3u.` address prefix. `m3u_settings` table and `redeem_vip_code` RPC are unused leftovers.
 - Storage buckets are private (workspace blocks public buckets); uploads store long-lived signed URLs on the app row.
 - Admin = `user_roles` admin row, auto-granted by signup trigger only to the boss email hard-coded in `handle_first_admin`; auth state lives in `AuthProvider` (`src/hooks/use-auth.tsx`).
 - Capacitor native install uses Filesystem.downloadFile + FileOpener with the APK MIME type (`src/lib/native-install.ts`); web falls back to a browser download.
