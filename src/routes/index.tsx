@@ -97,15 +97,6 @@ function Home() {
   );
 }
 
-function Row({ title, apps }: { title: string; apps: AppRow[] }) {
-  return (
-    <section className="mt-12">
-      <h2 className="px-4 sm:px-14 text-xl sm:text-2xl font-bold">{title}</h2>
-      <div className="no-scrollbar flex gap-4 sm:gap-6 overflow-x-auto px-4 sm:px-14 py-6">{apps.map((a) => <AppTile key={a.id} app={a} />)}</div>
-    </section>
-  );
-}
-
 function CategoryRowView({ category, apps }: { category: CategoryRow; apps: AppRow[] }) {
   return (
     <section className="mt-12">
