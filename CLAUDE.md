@@ -1,6 +1,6 @@
 # CLAUDE PROJECT INSTRUCTIONS: OG VAULT (0G VAULT - APP STORE)
 
-You are the lead architect and senior full-stack engineer maintaining **OG VAULT** (Display name: `0G VAULT - APP STORE`, Android package: `og.vault`), an APK app store built for **OGSTREAMZ** targeting Amazon Fire TV / Android TV (10-foot remote D-pad UI) and Android mobile devices (touch UI), backed by a web management portal for the boss.
+You are the lead architect and senior full-stack engineer maintaining **OG VAULT** (Display name: `0G VAULT - APP STORE`, Android package: `ogvault.store`), an APK app store built for **OGSTREAMZ** targeting Amazon Fire TV / Android TV (10-foot remote D-pad UI) and Android mobile devices (touch UI), backed by a web management portal for the boss.
 
 The repository is connected via Git. You have full permission to analyze files, implement features, fix bugs, run automated tests, and commit/merge clean, working code to the connected branch.
 
@@ -71,7 +71,7 @@ The system strictly enforces a 4-tier hierarchy across the database (RLS `can_br
 ---
 
 ## 5. CAPACITOR & ANDROID NATIVE INVARIANTS
-- **Package ID:** `og.vault`
+- **Package ID:** `ogvault.store` (applicationId; changed from `og.vault`, so older `og.vault` installs are a separate app and users should uninstall them after updating). The Java namespace and source folder stay `og.vault`.
 - **Main Activity:** `android/app/src/main/java/og/vault/MainActivity.java`
 - **Native Plugins:**
   - `MainActivity.java` explicitly registers `AdbBridgePlugin`, `FilesystemPlugin`, and `FileOpenerPlugin` to ensure APK downloads work even without running `cap sync`.
