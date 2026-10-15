@@ -99,6 +99,13 @@
       "when": 1792032924290,
       "tag": "0013_app_sort_order",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792033606706,
+      "tag": "0014_apps_sort_order",
+      "breakpoints": true
     }
   ]
 }
