@@ -4,7 +4,7 @@ android {
     namespace = "og.vault"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "og.vault"
+        applicationId "ogvault.store"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // Raise versionCode for every store APK published in Boss Controls → Store Updates;
