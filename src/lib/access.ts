@@ -56,7 +56,12 @@ export const VIP_CODE_PATTERN = /^OG-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 
 export const BOSS_EMAIL = "ogstreamz196@gmail.com";
 
-/** VIP-only apps show in the dedicated VIP category and in the category picked at upload. */
+/**
+ * VIP-only apps show in the dedicated VIP category and in the category picked at upload.
+ * The category's own apps come first (in the boss's order), then VIP apps from elsewhere.
+ */
 export function appsForCategory<T extends { category_id: string | null; audiences: string[] }>(apps: T[], category: { id: string; is_vip: boolean }): T[] {
-  return apps.filter((a) => a.category_id === category.id || (category.is_vip && tierFromAudiences(a.audiences) === "vip"));
+  const own = apps.filter((a) => a.category_id === category.id);
+  if (!category.is_vip) return own;
+  return [...own, ...apps.filter((a) => a.category_id !== category.id && tierFromAudiences(a.audiences) === "vip")];
 }

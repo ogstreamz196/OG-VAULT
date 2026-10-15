@@ -9,10 +9,14 @@ export type CategoryRow = Tables<"categories">;
 export const catalogQuery = queryOptions({
   queryKey: ["catalog"],
   queryFn: async () => {
-    const [apps, cats] = await Promise.all([
-      supabase.from("apps").select("*").eq("is_active", true).order("created_at", { ascending: false }),
+    const activeApps = () => supabase.from("apps").select("*").eq("is_active", true);
+    const [ordered, cats] = await Promise.all([
+      // Boss-defined order inside each category; newest first where it hasn't been set.
+      activeApps().order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
       supabase.from("categories").select("*").order("sort_order"),
     ]);
+    // Until the sort_order migration is applied the column doesn't exist; keep the store working.
+    const apps = ordered.error && /sort_order/.test(ordered.error.message) ? await activeApps().order("created_at", { ascending: false }) : ordered;
     if (apps.error) throw apps.error;
     if (cats.error) throw cats.error;
     return { apps: apps.data, categories: cats.data };

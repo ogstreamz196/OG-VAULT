@@ -74,6 +74,10 @@ describe("VIP section", () => {
     expect(afc(apps, vipCat).map((a) => a.id)).toEqual(["1"]);
     expect(afc(apps, media).map((a) => a.id)).toEqual(["1", "2"]);
   });
+  it("lists the VIP category's own apps first, then VIP apps from other categories", () => {
+    const mixed = [{ id: "x", category_id: "m", audiences: ["vip"] }, { id: "own", category_id: "v", audiences: ["vip"] }];
+    expect(afc(mixed, vipCat).map((a) => a.id)).toEqual(["own", "x"]);
+  });
 });
 
 import { installState } from "@/lib/installed";
@@ -96,4 +100,26 @@ describe("store self-update", () => {
   it("stays quiet on the same or a newer build", () => expect(isStoreUpdateAvailable(release, 3)).toBe(false));
   it("never offers an update in the browser", () => expect(isStoreUpdateAvailable(release, null)).toBe(false));
   it("needs an APK to install", () => expect(isStoreUpdateAvailable({ build_number: 3, apk_url: null }, 1)).toBe(false));
+});
+
+import { byCategoryOrder, moveInCategory } from "@/lib/app-order";
+describe("app order inside a category", () => {
+  const apps = [
+    { id: "a", sort_order: 1, created_at: "2026-01-03" },
+    { id: "b", sort_order: 2, created_at: "2026-01-02" },
+    { id: "c", sort_order: 3, created_at: "2026-01-01" },
+  ];
+  it("moves an app up by swapping it with the one above", () =>
+    expect(moveInCategory(apps, 1, -1)).toEqual([{ id: "b", sort_order: 1 }, { id: "a", sort_order: 2 }]));
+  it("does nothing past either end", () => {
+    expect(moveInCategory(apps, 0, -1)).toEqual([]);
+    expect(moveInCategory(apps, 2, 1)).toEqual([]);
+  });
+  it("still moves apps that share the default order", () => {
+    const fresh = apps.map((a) => ({ ...a, sort_order: 0 }));
+    expect(byCategoryOrder(fresh).map((a) => a.id)).toEqual(["a", "b", "c"]);
+    const writes = moveInCategory(fresh, 2, -1);
+    const order = byCategoryOrder(fresh.map((a) => ({ ...a, sort_order: writes.find((w) => w.id === a.id)?.sort_order ?? a.sort_order })));
+    expect(order.map((a) => a.id)).toEqual(["a", "c", "b"]);
+  });
 });
