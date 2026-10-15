@@ -21,9 +21,19 @@ export function VaultPassModal({ open, onClose }: { open: boolean; onClose: () =
             <Lock className="h-8 w-8 text-vip sm:h-6 sm:w-6" />
           </div>
           <h2 className="relative mt-4 text-3xl font-extrabold tracking-tight sm:pr-24 sm:text-3xl lg:text-4xl">UNLOCK VIP ACCESS</h2>
-          <p className="relative mt-2 text-base text-muted-foreground sm:text-lg">
-            Scan this code with your phone camera to open <span className="font-bold text-foreground">ogbot.co.uk</span>, buy the Vault Pass from the store, then sign in here to unlock every VIP app.
-          </p>
+          <ol className="relative mx-auto mt-3 max-w-md space-y-2 text-left text-base text-muted-foreground sm:mx-0 sm:text-lg">
+            {[
+              <>Scan the QR code or visit <span className="font-bold text-foreground">ogbot.co.uk</span></>,
+              <>Register using your <span className="font-bold text-foreground">Stream profile username</span></>,
+              <>Find and purchase the <span className="font-bold text-foreground">Vault Pass</span> in the store</>,
+              <>Sign into the Vault to unlock downloads</>,
+            ].map((step, i) => (
+              <li key={i} className="flex gap-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-vip text-sm font-bold text-primary-foreground sm:mt-0.5">{i + 1}</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
           {openLink("hidden sm:block")}
         </div>
 

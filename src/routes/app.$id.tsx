@@ -170,7 +170,7 @@ function AppDetail() {
                       <button data-nav onClick={() => setPassOpen(true)} className="tv-focus flex items-center gap-2 rounded-xl border border-vip/60 bg-vip/15 px-6 py-4 text-lg font-bold"><Lock className="h-5 w-5" />Vault Pass required</button>
                       <button data-nav data-nav-autofocus onClick={() => setPassOpen(true)} className="tv-focus rounded-xl bg-vip px-6 py-4 font-bold text-primary-foreground">Get Vault Pass</button>
                     </div>
-                    <p className="text-muted-foreground">Visit <span className="font-bold text-foreground">ogbot.co.uk</span> and buy the Vault Pass from the store to unlock VIP apps.</p>
+                    <p className="max-w-2xl text-muted-foreground">Visit <span className="font-bold text-foreground">ogbot.co.uk</span>, register using your <span className="font-bold text-foreground">Stream profile username</span>, and find the <span className="font-bold text-foreground">Vault Pass</span> inside the store. Once active, sign back into the Vault to unlock VIP apps.</p>
                   </div>
                 )}
               </div>
