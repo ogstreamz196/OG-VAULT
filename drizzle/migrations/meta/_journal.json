@@ -92,6 +92,13 @@
       "when": 1791976308480,
       "tag": "0012_store_release",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792032924290,
+      "tag": "0013_app_sort_order",
+      "breakpoints": true
     }
   ]
 }

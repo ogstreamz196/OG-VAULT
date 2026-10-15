@@ -69,6 +69,7 @@ export type Database = {
           is_featured: boolean
           package_name: string
           screenshots: string[]
+          sort_order: number
           tier: string
           title: string
           updated_at: string
@@ -90,6 +91,7 @@ export type Database = {
           is_featured?: boolean
           package_name?: string
           screenshots?: string[]
+          sort_order?: number
           tier?: string
           title: string
           updated_at?: string
@@ -111,6 +113,7 @@ export type Database = {
           is_featured?: boolean
           package_name?: string
           screenshots?: string[]
+          sort_order?: number
           tier?: string
           title?: string
           updated_at?: string

@@ -31,6 +31,8 @@ function Home() {
   const { data, isLoading, error } = useQuery(catalogQuery);
   const visible = useMemo(() => data?.apps ?? [], [data]);
   const featured = visible.filter((a) => a.is_featured);
+  // The catalog follows the boss's per-category order, so "Recently Added" sorts by date itself.
+  const recent = useMemo(() => [...visible].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10), [visible]);
   const [slide, setSlide] = useState(0);
   useEffect(() => {
     if (featured.length < 2) return;
@@ -88,7 +90,7 @@ function Home() {
 
       {data && (
         <>
-          {visible.length > 0 && <Row title="Recently Added" apps={visible.slice(0, 10)} />}
+          {visible.length > 0 && <Row title="Recently Added" apps={recent} />}
           {data.categories.map((c) => (
             <CategoryRowView key={c.id} category={c} apps={appsForCategory(data.apps, c)} />
           ))}
