@@ -8,7 +8,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 export type StoreRelease = Tables<"store_release">;
 
-export const STORE_PACKAGE = "og.vault";
+export const STORE_PACKAGE = "ogvault.store";
 
 /**
  * versionCode of every store APK built before devices could report their own version
