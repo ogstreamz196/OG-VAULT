@@ -316,7 +316,6 @@ export type Database = {
           changelog: string
           id: number
           is_mandatory: boolean
-          purge_token: string | null
           updated_at: string
           version: string
         }
@@ -326,7 +325,6 @@ export type Database = {
           changelog?: string
           id?: number
           is_mandatory?: boolean
-          purge_token?: string | null
           updated_at?: string
           version?: string
         }
@@ -336,7 +334,6 @@ export type Database = {
           changelog?: string
           id?: number
           is_mandatory?: boolean
-          purge_token?: string | null
           updated_at?: string
           version?: string
         }
