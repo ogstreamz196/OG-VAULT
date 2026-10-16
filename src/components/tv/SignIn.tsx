@@ -34,11 +34,15 @@ export function SignIn() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center overflow-hidden px-4 py-8 sm:py-10">
-      {/* portal backdrop */}
-      <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(ellipse at 50% 28%, color-mix(in oklab, var(--glow) 28%, transparent), transparent 55%), radial-gradient(circle at 50% 100%, color-mix(in oklab, var(--vip) 22%, transparent), transparent 50%)" }} />
+    <div className="relative flex min-h-[100dvh] flex-col items-center justify-center gap-6 overflow-hidden px-4 py-8 landscape:flex-row landscape:gap-[6vw] landscape:py-6">
+      <SignInWallpaper />
 
-      <div className="relative mt-2 flex w-full max-w-[min(78vw,26rem,48vh)] items-center justify-center">
+      {/* Kept out of the remote's reach (no data-nav) and out of the way, so nobody lands on it by accident. */}
+      <button type="button" onClick={google} className="absolute right-3 top-3 z-10 rounded-md px-2 py-1 text-[10px] font-semibold tracking-widest text-muted-foreground/50 hover:text-muted-foreground">
+        D.EV MODE
+      </button>
+
+      <div className="relative flex w-full max-w-[min(68vw,22rem,34vh)] shrink-0 items-center justify-center landscape:max-w-[min(40vw,68vh,34rem)]">
         <div className="animate-portal-spin absolute -inset-6 rounded-full opacity-70 blur-2xl sm:-inset-10"
           style={{ background: "conic-gradient(from 0deg, var(--glow), transparent 25%, var(--primary) 50%, transparent 75%, var(--glow))" }} />
         <div className="animate-portal-pulse absolute -inset-2 rounded-[2rem] border-2 border-glow/60 sm:-inset-3"
@@ -47,7 +51,7 @@ export function SignIn() {
           className="animate-portal-in relative aspect-square w-full rounded-[1.75rem] object-cover shadow-2xl" />
       </div>
 
-      <form onSubmit={submit} className="glass animate-rise-in relative mt-8 w-full max-w-md space-y-4 rounded-3xl p-5 sm:mt-10 sm:max-w-xl sm:space-y-5 sm:p-8">
+      <form onSubmit={submit} className="glass animate-rise-in relative w-full max-w-md space-y-4 rounded-3xl p-5 sm:max-w-xl sm:space-y-5 sm:p-8 landscape:max-w-[min(30rem,46vw)] landscape:space-y-3 landscape:p-6">
         <div className="text-center">
           <p className="text-xs uppercase tracking-[0.35em] text-glow">Vault access</p>
           <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">Enter the vault</h1>
@@ -58,10 +62,28 @@ export function SignIn() {
         <button data-nav type="submit" disabled={busy} className={`${btn} w-full bg-primary text-primary-foreground disabled:opacity-60`}>
           {busy ? "Unlocking…" : "Sign in"}
         </button>
-        <button data-nav type="button" onClick={google} className="tv-focus w-full rounded-xl py-2 text-sm text-muted-foreground">
-          D.EV MODE
-        </button>
       </form>
+    </div>
+  );
+}
+
+// Fixed embers: [left %, size px, duration s, delay s]. Few and transform-only so a Firestick keeps up.
+const EMBERS: [number, number, number, number][] = [
+  [6, 3, 9, 0], [14, 2, 12, 4], [22, 4, 10, 7], [31, 2, 13, 2], [39, 3, 11, 9], [47, 2, 14, 5],
+  [55, 4, 10, 1], [63, 2, 12, 8], [71, 3, 9, 3], [79, 2, 13, 10], [87, 4, 11, 6], [94, 2, 10, 2],
+];
+
+/** Wallpaper in the logo's style: smoky navy sky, electric-blue glow, a burning skyline and rising embers. */
+function SignInWallpaper() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden bg-background">
+      <img src="/og-vault-wallpaper.webp" alt="" className="absolute inset-0 h-full w-full object-cover opacity-50" />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 70% 55% at 50% 35%, color-mix(in oklab, var(--glow) 22%, transparent), transparent 70%), radial-gradient(ellipse 120% 45% at 50% 108%, rgb(255 98 30 / 0.55), transparent 70%), linear-gradient(to bottom, var(--background) 0%, transparent 35%)" }} />
+      <img src="/og-vault-skyline.svg" alt="" className="absolute inset-x-0 bottom-0 h-[30vh] w-full object-cover object-bottom" />
+      {EMBERS.map(([left, size, dur, delay]) => (
+        <span key={left} className="ember" style={{ left: `${left}%`, width: size, height: size, animationDuration: `${dur}s`, animationDelay: `${delay}s` }} />
+      ))}
+      <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 55%, rgb(2 4 12 / 0.75) 100%)" }} />
     </div>
   );
 }

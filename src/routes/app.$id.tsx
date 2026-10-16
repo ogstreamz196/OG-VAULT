@@ -100,7 +100,7 @@ function AppDetail() {
   }
 
   if (!ready) return <BrandLoader />;
-  if (!user) return <TvShell key="signin" onBack={() => false}><SignIn /></TvShell>;
+  if (!user) return <TvShell dock={false} key="signin" onBack={() => false}><SignIn /></TvShell>;
   if (isLoading)
     return (
       <TvShell>

@@ -1,5 +1,5 @@
 # Regenerates every 0G VAULT logo asset (Android icons, splashes, Fire TV banners, favicon,
-# web logo) from one master image. Usage: python3 scripts/brand/generate-logo-assets.py scripts/brand/og-vault-logo-source.png .
+# web logo, sign-in wallpaper) from one master image. Usage: python3 scripts/brand/generate-logo-assets.py scripts/brand/og-vault-logo-source.png .
 import sys, os
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 import numpy as np
@@ -84,4 +84,31 @@ fav = fit(master, 256)
 fav.save(os.path.join(repo, "public/favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
 save(fit(master, 192), os.path.join(repo, "public/icon-192.png"))
 master.save(os.path.join(repo, "public/og-vault-logo.webp"), quality=90, method=6)
+
+def wallpaper(W, H):
+    # Sign-in backdrop in the logo's colours: its burning-city background blown up and blurred,
+    # deep-navy top, ember glow along the bottom, and a dark vignette so the form stays readable.
+    # Mirror the artwork's burning left/right edges across the width (keeps the emblem and its
+    # lettering out of the backdrop), then blur hard so only the fire-and-electric colours remain.
+    edge = master.width // 4
+    left, right = master.crop((0, 0, edge, master.height)), master.crop((master.width - edge, 0, master.width, master.height))
+    strip = Image.new("RGB", (edge * 4, master.height))
+    for i, part in enumerate([left, right.transpose(Image.FLIP_LEFT_RIGHT), left.transpose(Image.FLIP_LEFT_RIGHT), right]):
+        strip.paste(part, (i * edge, 0))
+    bg = strip.resize((W, round(W * strip.height / strip.width)), Image.LANCZOS)
+    bg = bg.crop((0, bg.height - H, W, bg.height))
+    bg = ImageEnhance.Color(bg.filter(ImageFilter.GaussianBlur(W / 45))).enhance(1.35)
+    bg = ImageEnhance.Brightness(bg).enhance(0.7)
+    a = np.asarray(bg).astype(float) / 255
+    y = np.linspace(0, 1, H)[:, None, None]
+    x = np.linspace(-1, 1, W)[None, :, None]
+    navy = np.array(TILE) / 255
+    a = a * (0.35 + 0.65 * y) + navy * (1 - y) * 0.65  # fade the top into the store's navy
+    ember = np.array([1.0, 0.42, 0.12])
+    a = a + ember * np.clip(y - 0.62, 0, 1) ** 2 * 0.9  # warm fire glow from the bottom edge
+    vignette = 1 - 0.55 * np.clip(np.sqrt(x ** 2 * 0.55 + (y - 0.45) ** 2 * 1.2), 0, 1) ** 2
+    a = np.clip(a * vignette, 0, 1)
+    return Image.fromarray((a * 255).astype(np.uint8))
+
+wallpaper(1600, 900).save(os.path.join(repo, "public/og-vault-wallpaper.webp"), quality=82, method=6)
 print("master", master.size)

@@ -8,7 +8,7 @@ import brandLogo from "@/assets/og-streamz-brand.webp.asset.json";
  * steps back through the store and returns to Home, and returns false on Home so the native
  * app exits (Fire TV convention).
  */
-export function TvShell({ children, onBack }: { children: ReactNode; onBack?: BackHandler | undefined }) {
+export function TvShell({ children, onBack, dock = true }: { children: ReactNode; onBack?: BackHandler | undefined; dock?: boolean }) {
   const router = useRouter();
   // Install once per screen; a fresh onBack each render must not reset focus handling.
   const backRef = useRef(onBack);
@@ -21,7 +21,8 @@ export function TvShell({ children, onBack }: { children: ReactNode; onBack?: Ba
       else router.navigate({ to: "/" });
     });
   }, [router]);
-  return <div className="min-h-screen bg-background pb-24 text-foreground overflow-x-hidden sm:pb-0">{children}</div>;
+  // `dock` reserves room for the phone bottom navigation; screens without it (sign-in) opt out.
+  return <div className={`min-h-screen bg-background text-foreground overflow-x-hidden ${dock ? "pb-24 sm:pb-0" : ""}`}>{children}</div>;
 }
 
 export function Logo({ className = "" }: { className?: string }) {
