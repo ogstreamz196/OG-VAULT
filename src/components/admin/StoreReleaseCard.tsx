@@ -5,11 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/catalog";
 import { inspectApk } from "@/lib/apk-parser";
 import { STORE_PACKAGE, storeReleaseQuery } from "@/lib/store-release";
+import { rememberPurgeToken } from "@/lib/cache-purge";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+  AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 /** Boss Controls: publish a new build of the 0G VAULT store APK for devices to self-update. */
 export function StoreReleaseCard() {
@@ -64,13 +70,37 @@ export function StoreReleaseCard() {
     if (!apkUrl.trim()) { toast.error("Upload the store APK first"); return; }
     if (build <= published && !confirm(`Build ${build} is not newer than the published build ${published}. Devices only update when the build goes up. Publish anyway?`)) return;
     setBusy("Publishing…");
-    const { error } = await supabase.from("store_release").upsert({
-      id: 1, version: version.trim(), build_number: build, apk_url: apkUrl.trim(), changelog: notes.trim(), is_mandatory: mandatory, updated_at: new Date().toISOString(),
-    });
+    // A new release also refreshes every device's cached store files.
+    const purged = await save({ version: version.trim(), build_number: build, apk_url: apkUrl.trim(), changelog: notes.trim(), is_mandatory: mandatory }, true);
     setBusy(null);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`0G VAULT v${version.trim()} (build ${build}) published — devices will offer the update`);
+    if (purged === null) return;
+    toast.success(`0G VAULT v${version.trim()} (build ${build}) published — devices will offer the update${purged ? " and refresh their cached files" : ""}`);
+  }
+
+  async function purgeAll() {
+    setBusy("Sending refresh to all devices…");
+    const purged = await save({}, true);
+    setBusy(null);
+    if (purged === null) return;
+    if (!purged) { toast.error("Refresh needs the latest database migration (store purge token) first."); return; }
+    toast.success("Refresh sent — devices clear their cached files and reload within a few minutes, or straight away when reopened");
+  }
+
+  /** Upserts the release row; with `purge`, also a new purge token. Returns whether the token was saved, or null on failure. */
+  async function save(fields: Omit<TablesInsert<"store_release">, "id">, purge: boolean): Promise<boolean | null> {
+    const now = new Date().toISOString();
+    const base = { id: 1, ...fields, updated_at: now };
+    let { error } = await supabase.from("store_release").upsert(purge ? { ...base, purge_token: now } : base);
+    let purged = purge;
+    // Before the purge_token migration is applied, save everything else instead of failing.
+    if (error && purge && /purge_token/.test(error.message)) {
+      purged = false;
+      ({ error } = await supabase.from("store_release").upsert(base));
+    }
+    if (error) { toast.error(error.message); return null; }
+    if (purged) rememberPurgeToken(now); // this browser is already fresh; don't reload the boss mid-edit
     qc.invalidateQueries({ queryKey: ["store-release"] });
+    return purged;
   }
 
   return (
@@ -102,6 +132,30 @@ export function StoreReleaseCard() {
       <div className="flex items-center justify-end gap-3">
         {busy && <span className="mr-auto text-sm text-glow">{busy}</span>}
         <Button onClick={publish} disabled={!!busy}>Publish Update</Button>
+      </div>
+
+      <div className="space-y-2 rounded-lg border border-glow/40 p-3">
+        <p className="text-sm text-muted-foreground">
+          Devices stuck on old store screens? This makes every Firestick, phone and browser clear its cached store files and reload, without signing anyone out.
+          {current?.purge_token && <span className="block pt-1 text-xs">Last refresh sent {new Date(current.purge_token).toLocaleString()}.</span>}
+        </p>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="secondary" className="w-full border border-glow/60 text-glow" disabled={!!busy}>🔄 Force Purge &amp; Refresh All Devices</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Refresh the store on every device?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Every Firestick, phone and browser running the store will clear its cached store files, saved web data and offline caches, then reload. Everyone stays signed in, and installed-app records are kept. Open devices pick this up within about five minutes, others the next time they open the store.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={purgeAll}>Purge &amp; refresh</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/hooks/use-auth";
+import { PurgeWatcher } from "@/components/tv/PurgeWatcher";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -127,6 +128,7 @@ function RootComponent() {
         <Outlet />
       </AuthProvider>
       <Toaster theme="dark" />
+      <PurgeWatcher />
     </QueryClientProvider>
   );
 }
