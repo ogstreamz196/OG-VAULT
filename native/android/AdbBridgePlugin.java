@@ -197,4 +197,20 @@ public class AdbBridgePlugin extends Plugin {
             call.resolve(r);
         }
     }
+
+    /**
+     * Empties this WebView's HTTP disk + memory cache so the next load fetches fresh store files.
+     * JavaScript can clear CacheStorage and service workers, but not this cache.
+     */
+    @PluginMethod
+    public void clearWebCache(PluginCall call) {
+        getBridge().executeOnMainThread(() -> {
+            try {
+                getBridge().getWebView().clearCache(true);
+                call.resolve();
+            } catch (Exception e) {
+                call.reject("Could not clear the web cache: " + e.getMessage());
+            }
+        });
+    }
 }

@@ -13,6 +13,7 @@ interface AdbBridgePlugin {
   isTv(): Promise<{ tv: boolean }>;
   isInstalled(o: { package: string }): Promise<{ installed: boolean }>;
   getPackageVersion(o: { package: string }): Promise<PackageVersion>;
+  clearWebCache(): Promise<void>;
   addListener(e: "installProgress", cb: (d: { stage: "download" | "push"; pct: number }) => void): Promise<PluginListenerHandle>;
 }
 
@@ -128,4 +129,10 @@ export async function devicePackageVersion(pkg: string): Promise<PackageVersion 
 /** Installed version of a package; in the browser this simulates "not installed". */
 export async function getPackageVersion(pkg: string): Promise<PackageVersion> {
   return (await devicePackageVersion(pkg)) ?? { installed: false, versionCode: 0, versionName: "" };
+}
+
+/** Empties the native WebView's HTTP cache; false in the browser or on APKs without the method. */
+export async function clearNativeWebCache(): Promise<boolean> {
+  if (!isNativeAdb()) return false;
+  try { await Native.clearWebCache(); return true; } catch { return false; }
 }

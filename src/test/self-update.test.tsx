@@ -10,7 +10,7 @@ vi.mock("@/lib/native-install", () => ({
   }),
 }));
 
-const release = { id: 1, version: "1.1.0", build_number: 2, apk_url: "https://example.com/og.vault.apk", changelog: "Faster downloads", is_mandatory: false, updated_at: "" };
+const release = { id: 1, version: "1.1.0", build_number: 2, apk_url: "https://example.com/og.vault.apk", changelog: "Faster downloads", is_mandatory: false, purge_token: null, updated_at: "" };
 
 describe("SelfUpdateModal", () => {
   it("shows the new version, notes and both remote-focusable actions", () => {

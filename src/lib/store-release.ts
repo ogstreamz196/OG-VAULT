@@ -18,8 +18,10 @@ export const LEGACY_STORE_BUILD = 1;
 
 export const storeReleaseQuery = queryOptions({
   queryKey: ["store-release"],
-  staleTime: 5 * 60_000,
-  refetchInterval: 30 * 60_000,
+  staleTime: 60_000,
+  // Checked every few minutes and on focus so a boss "purge & refresh" reaches devices quickly.
+  refetchInterval: 5 * 60_000,
+  refetchOnWindowFocus: true,
   queryFn: async (): Promise<StoreRelease | null> => {
     const { data, error } = await supabase.from("store_release").select("*").eq("id", 1).maybeSingle();
     // Never let a missing table or network hiccup break the store; just offer no update.
