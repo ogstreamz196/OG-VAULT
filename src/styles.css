@@ -173,3 +173,20 @@
 }
 @utility update-glow { animation: update-glow 1.8s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .update-glow { animation: none; filter: drop-shadow(0 0 8px var(--glow)); } }
+
+/* Sign-in wallpaper embers drifting up from the burning skyline. */
+@keyframes ember-rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translate3d(18px, -85vh, 0); opacity: 0; }
+}
+.ember {
+  position: absolute;
+  bottom: 4vh;
+  border-radius: 9999px;
+  background: #ffb26b;
+  box-shadow: 0 0 6px 2px rgb(255 110 40 / 0.8);
+  animation: ember-rise 10s linear infinite;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) { .ember { display: none; } }

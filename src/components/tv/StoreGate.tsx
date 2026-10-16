@@ -11,6 +11,6 @@ const exitApp = () => false;
 export function StoreGate({ children, onBack }: { children: ReactNode; onBack?: BackHandler | undefined }) {
   const { ready, user } = useAuth();
   if (!ready) return <BrandLoader />;
-  if (!user) return <TvShell key="signin" onBack={exitApp}><SignIn /></TvShell>;
+  if (!user) return <TvShell dock={false} key="signin" onBack={exitApp}><SignIn /></TvShell>;
   return <TvShell key="store" onBack={onBack}>{children}</TvShell>;
 }
