@@ -1,15 +1,18 @@
 import { Lock } from "lucide-react";
+import { isNative } from "@/lib/native-install";
 import { VIP_STORE_URL } from "./VipLock";
 
 // Phones stack the QR above the copy; TVs and wider screens put them side by side so the
 // whole card fits a 960x540 Firestick viewport without scrolling.
 export function VaultPassModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
-  const openLink = (cls: string) => (
-    <a data-nav data-nav-autofocus href={VIP_STORE_URL} target="_blank" rel="noopener noreferrer" className={`tv-focus relative mt-6 w-full rounded-xl bg-vip px-6 py-4 text-center text-lg font-bold text-primary-foreground ${cls}`}>
-      Open ogbot.co.uk on this device
-    </a>
-  );
+  // On the native APK there is no browser to open — the QR code is the way in.
+  const openLink = (cls: string) =>
+    isNative() ? null : (
+      <a data-nav data-nav-autofocus href={VIP_STORE_URL} target="_blank" rel="noopener noreferrer" className={`tv-focus relative mt-6 w-full rounded-xl bg-vip px-6 py-4 text-center text-lg font-bold text-primary-foreground ${cls}`}>
+        Open ogbot.co.uk on this device
+      </a>
+    );
   return (
     <div data-nav-scope className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-background/95 p-4 sm:items-center sm:p-10">
       <div className="glass relative w-full max-w-xl overflow-hidden rounded-3xl border-vip/50 p-6 text-center sm:grid sm:max-w-3xl sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-8 sm:p-8 sm:text-left">
