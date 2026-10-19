@@ -1,5 +1,6 @@
 # OG VAULT roadmap
-- [ ] Require app categories, automatically assign boss-only apps to boss categories, and verify non-boss visibility.
+- [x] Require app categories, automatically assign boss-only apps to boss categories, and verify non-boss visibility.
+- [ ] Verify saving through Boss Controls — available preview account is non-admin; requires a boss session.
 - [x] Backend: catalog, categories, VIP codes, M3U settings, storage
 - [x] TV store client with D-pad navigation, detail screen, login gate
 - [x] Admin portal (apps, media, APKs, categories, VIP codes, M3U)
