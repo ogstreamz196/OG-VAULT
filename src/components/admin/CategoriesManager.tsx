@@ -23,7 +23,7 @@ export function CategoriesManager() {
   const [name, setName] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const toggleOpen = (id: string) => setOpen((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["admin-cats"] }); qc.invalidateQueries({ queryKey: ["catalog"] }); };
+  const refresh = () => { for (const key of ["admin-cats", "admin-apps", "admin-cat-counts", "admin-category-apps", "catalog", "app"]) qc.invalidateQueries({ queryKey: [key] }); };
 
   async function add() {
     if (!name.trim()) return;
@@ -51,7 +51,8 @@ export function CategoriesManager() {
     refresh();
   }
   async function remove(c: CategoryRow) {
-    if (!confirm(`Remove ${c.name}? Apps in it will become uncategorized.`)) return;
+    if ((counts?.get(c.id) ?? 0) > 0) { toast.error("Move apps to another category before removing this category"); return; }
+    if (!confirm(`Remove ${c.name}?`)) return;
     const { error } = await supabase.from("categories").delete().eq("id", c.id);
     if (error) toast.error(error.message); else refresh();
   }

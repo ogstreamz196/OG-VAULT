@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canSeeApp, canDownloadApp, tierFromAudiences, generateVipCode, isCategoryLocked, usernameError, usernameToEmail, VIP_CODE_PATTERN } from "@/lib/access";
+import { canSeeApp, canDownloadApp, tierFromAudiences, generateVipCode, isCategoryLocked, usernameError, usernameToEmail, VIP_CODE_PATTERN, placeAppInCategory, appCategoryError } from "@/lib/access";
 import { pickNext } from "@/lib/spatial-nav";
 
 describe("app audiences", () => {
@@ -33,6 +33,29 @@ describe("VIP category", () => {
   it("is locked for non-VIP", () => expect(isCategoryLocked({ is_vip: true }, false)).toBe(true));
   it("is open for VIP", () => expect(isCategoryLocked({ is_vip: true }, true)).toBe(false));
   it("normal categories are always open", () => expect(isCategoryLocked({ is_vip: false }, false)).toBe(false));
+});
+
+describe("mandatory private category placement", () => {
+  const categories = [{ id: "public", is_boss: false }, { id: "boss", is_boss: true }, { id: "boss-2", is_boss: true }];
+  it("automatically files boss-only apps in a boss category", () => {
+    expect(placeAppInCategory(["boss"], null, categories)).toEqual({ audiences: ["boss"], category_id: "boss" });
+    expect(placeAppInCategory(["boss"], "public", categories).category_id).toBe("boss");
+    expect(placeAppInCategory(["boss"], "boss-2", categories).category_id).toBe("boss-2");
+  });
+  it("requires an existing category for every app", () => {
+    expect(appCategoryError(null, categories)).not.toBeNull();
+    expect(appCategoryError("missing", categories)).not.toBeNull();
+    expect(appCategoryError("public", categories)).toBeNull();
+  });
+  it("makes apps placed in a boss category exclusively boss-only", () => {
+    expect(placeAppInCategory(["free", "vip"], "boss", categories)).toEqual({ audiences: ["boss"], category_id: "boss" });
+  });
+  it("never lets guest, free or VIP members see or download boss-only apps", () => {
+    for (const level of ["none", "guest", "free", "vip"] as const) {
+      expect(canSeeApp(level, ["boss"])).toBe(false);
+      expect(canDownloadApp(level, ["boss"])).toBe(false);
+    }
+  });
 });
 
 describe("username accounts", () => {
