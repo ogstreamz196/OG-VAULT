@@ -120,6 +120,13 @@
       "when": 1792177209232,
       "tag": "0016_store_purge_token",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792369807595,
+      "tag": "0017_enforce_app_category_placement",
+      "breakpoints": true
     }
   ]
 }
