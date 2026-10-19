@@ -21,6 +21,22 @@ export type Level = "none" | "guest" | "free" | "vip" | "admin";
 export const AUDIENCES = ["guest", "free", "vip", "boss"] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
+type AppCategory = { id: string; is_boss: boolean };
+
+export function placeAppInCategory(audiences: string[], categoryId: string | null, categories: AppCategory[]) {
+  const selected = categories.find((c) => c.id === categoryId);
+  if (audiences.length === 1 && audiences[0] === "boss") {
+    const category = selected?.is_boss ? selected : categories.find((c) => c.is_boss);
+    return { audiences: ["boss"], category_id: category?.id ?? null };
+  }
+  if (selected?.is_boss) return { audiences: ["boss"], category_id: selected.id };
+  return { audiences, category_id: selected?.id ?? null };
+}
+
+export function appCategoryError(categoryId: string | null, categories: AppCategory[]): string | null {
+  return categories.some((c) => c.id === categoryId) ? null : "Select a category before saving this app";
+}
+
 const BROWSE: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["guest", "free", "vip"], guest: ["guest"] };
 const DOWNLOAD: Record<string, string[]> = { vip: ["guest", "free", "vip"], free: ["guest", "free"], guest: ["guest"] };
 

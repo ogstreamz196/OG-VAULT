@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AppIcon } from "@/components/tv/TvShell";
-import { AUDIENCES, tierFromAudiences } from "@/lib/access";
+import { AUDIENCES, tierFromAudiences, placeAppInCategory, appCategoryError } from "@/lib/access";
 
 const AUDIENCE_LABEL = { guest: "Guest (D.EV MODE)", free: "Free members", vip: "VIP", boss: "Boss only" } as const;
 
@@ -36,7 +36,7 @@ export function AppsManager({ editId }: { editId?: string | undefined } = {}) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("all");
 
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["admin-apps"] }); qc.invalidateQueries({ queryKey: ["catalog"] }); };
+  const refresh = () => { for (const key of ["admin-apps", "admin-cat-counts", "admin-category-apps", "catalog", "app"]) qc.invalidateQueries({ queryKey: [key] }); };
 
   async function remove(a: AppRow) {
     if (!confirm(`Delete ${a.title}?`)) return;
@@ -98,11 +98,22 @@ export function AppsManager({ editId }: { editId?: string | undefined } = {}) {
 }
 
 function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; categories: CategoryRow[]; onClose: () => void; onSaved: () => void }) {
-  const [d, setD] = useState<Draft>(draft);
+  const [d, setD] = useState<Draft>(() => ({ ...draft, ...placeAppInCategory(draft.audiences ?? [], draft.category_id ?? null, categories) }));
   const [busy, setBusy] = useState<string | null>(null);
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }));
   const [features, setFeatures] = useState("");
   const gen = useServerFn(generateStoreCopy);
+
+  function changeAudience(audience: string, checked: boolean) {
+    setD((previous) => {
+      const current = previous.audiences ?? [];
+      const audiences = audience === "boss"
+        ? (checked ? [] : ["boss"])
+        : (checked ? current.filter((a) => a !== audience) : [...current.filter((a) => a !== "boss"), audience]);
+      const categoryId = current.includes("boss") && !audiences.includes("boss") ? null : previous.category_id ?? null;
+      return { ...previous, ...placeAppInCategory(audiences, categoryId, categories) };
+    });
+  }
 
   async function generate() {
     if (!d.title.trim()) { toast.error("Add a title first"); return; }
@@ -182,8 +193,11 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
   async function save() {
     if (!d.title.trim()) { toast.error("Title is required"); return; }
     if (!(d.audiences ?? []).length) { toast.error("Pick at least one group: Guest, Free or VIP"); return; }
+    const placement = placeAppInCategory(d.audiences ?? [], d.category_id ?? null, categories);
+    const categoryError = appCategoryError(placement.category_id, categories);
+    if (categoryError) { toast.error(categoryError); return; }
     setBusy("Saving…");
-    const payload = { ...d, tier: tierFromAudiences(d.audiences ?? []), updated_at: new Date().toISOString() };
+    const payload = { ...d, ...placement, tier: tierFromAudiences(placement.audiences), updated_at: new Date().toISOString() };
     const { error } = d.id ? await supabase.from("apps").update(payload).eq("id", d.id) : await supabase.from("apps").insert(payload);
     setBusy(null);
     if (error) { toast.error(error.message); return; }
@@ -201,10 +215,10 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
           <F label="Package name"><Input value={d.package_name ?? ""} placeholder="com.example.app" onChange={(e) => set("package_name", e.target.value)} /></F>
           <F label="Version"><Input value={d.version ?? ""} onChange={(e) => set("version", e.target.value)} /></F>
           <F label="Build number"><Input type="number" value={d.build_number ?? 1} onChange={(e) => set("build_number", Number(e.target.value) || 1)} /></F>
-          <F label="Category">
-            <select className="h-9 w-full rounded-md border border-input bg-muted px-3 text-sm" value={d.category_id ?? ""} onChange={(e) => set("category_id", e.target.value || null)}>
-              <option value="">None</option>
-              {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          <F label="Category (required)">
+            <select aria-label="Category (required)" required className="h-9 w-full rounded-md border border-input bg-muted px-3 text-sm" value={d.category_id ?? ""} onChange={(e) => setD((p) => ({ ...p, ...placeAppInCategory(p.audiences ?? [], e.target.value || null, categories) }))}>
+              <option value="" disabled>Select a category</option>
+              {categories.filter((c) => !(d.audiences ?? []).includes("boss") || c.is_boss).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </F>
           <F label="Who can see this app">
@@ -213,7 +227,7 @@ function AppEditor({ draft, categories, onClose, onSaved }: { draft: Draft; cate
                 const on = (d.audiences ?? []).includes(a);
                 return (
                   <label key={a} className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-semibold ${on ? "border-glow text-glow" : "text-muted-foreground"}`}>
-                    <input type="checkbox" checked={on} onChange={() => set("audiences", on ? (d.audiences ?? []).filter((x) => x !== a) : [...(d.audiences ?? []), a])} />
+                    <input type="checkbox" checked={on} onChange={() => changeAudience(a, on)} />
                     {AUDIENCE_LABEL[a]}
                   </label>
                 );
