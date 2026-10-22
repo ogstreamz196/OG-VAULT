@@ -33,6 +33,7 @@
 - The native app's server.url points at the published custom domain — the preview URL is private and returns 401 on devices.
 - Boss Controls are web-only: the header link and `/admin` are hidden/blocked when `isNative()` is true — the boss manages the store from a browser, never from the APK.
 - Remote purge uses `store_release.purge_token`, `PurgeWatcher` and `executeClientPurge`; preserve auth, install ledger and ADB host while clearing caches and reloading once.
+- Phone downloads: "Download to my Android phone" on an app page shows a QR (drawn by the in-repo encoder `src/lib/qr.ts`, no QR service) for `/api/public/dl/<token>`. `createPhoneDownloadLink` (auth + `canDownloadApp`) issues an AES-GCM token (`src/lib/phone-link.ts`, key derived from PHONE_LINK_SECRET or VAULT_AUTH_SECRET) holding app id, user id and a 30-minute expiry; the route decrypts it, re-checks the app and the user's tier, and streams the APK as an attachment so the real file URL is never exposed and links can't be edited to reach other apps.
 - Store-wide announcement is the single-row `store_broadcast` table (public read, admin write), rendered by `BroadcastBar` under `StoreHeader`.
 
 - App category placement is shared through `placeAppInCategory` and enforced by database triggers and a required-category constraint; guard category deletion and privacy changes to prevent orphaned or exposed apps.

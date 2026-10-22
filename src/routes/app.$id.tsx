@@ -12,7 +12,8 @@ import { logInstallEvent } from "@/lib/telemetry";
 import { devicePackageVersion, isNativeAdb, launchLocalApp, openLocalAppSettings, isTvDevice, isLocallyInstalled, type PushStage } from "@/lib/adb-bridge";
 import { AppIcon, TierBadge, TvShell } from "@/components/tv/TvShell";
 import { VaultPassModal } from "@/components/tv/VaultPassModal";
-import { Lock } from "lucide-react";
+import { PhoneDownloadModal } from "@/components/tv/PhoneDownloadModal";
+import { Lock, Smartphone } from "lucide-react";
 
 export const Route = createFileRoute("/app/$id")({
   head: () => ({
@@ -40,6 +41,7 @@ function AppDetail() {
   const [pushing, setPushing] = useState<{ stage: PushStage; pct: number } | null>(null);
   const [onTv, setOnTv] = useState(false);
   const [passOpen, setPassOpen] = useState(false);
+  const [phoneOpen, setPhoneOpen] = useState(false);
   const [nativeAdb, setNativeAdb] = useState(false);
   useEffect(() => { setNativeAdb(isNativeAdb()); isTvDevice().then(setOnTv); }, []);
   // Real installed version from the device; re-read when the user returns from the installer.
@@ -68,6 +70,7 @@ function AppDetail() {
 
   const back = () => {
     if (passOpen) return setPassOpen(false);
+    if (phoneOpen) return setPhoneOpen(false);
     if (shot) return setShot(null);
     if (router.history.canGoBack()) router.history.back();
     else router.navigate({ to: "/" });
@@ -155,7 +158,10 @@ function AppDetail() {
                 {allowed ? (
                   <>
                     <button data-nav data-nav-autofocus onClick={install} disabled={progress !== null || pushing !== null} className={`tv-focus rounded-xl bg-primary px-6 sm:px-10 py-4 text-lg sm:text-xl font-bold text-primary-foreground disabled:opacity-70 ${inst === "update" && progress === null ? "update-glow" : ""}`}>
-                      {progress !== null ? `Downloading ${progress}%` : inst === "update" ? `Update to v${app.version}` : inst === "installed" ? "Re-install" : isNative() ? "Download & Install" : "Download APK"}
+                      {progress !== null ? `Downloading ${progress}%` : inst === "update" ? `Update to v${app.version}` : inst === "installed" ? "Re-install" : "Download to this device"}
+                    </button>
+                    <button data-nav onClick={() => setPhoneOpen(true)} className="tv-focus flex items-center gap-2 rounded-xl border border-glow/60 bg-glow/10 px-6 py-4 text-lg font-semibold text-glow">
+                      <Smartphone className="h-5 w-5" />Download to my Android phone
                     </button>
                     {(onDevice ?? inst !== "none") && app.package_name && nativeAdb && (
                       <>
@@ -231,6 +237,7 @@ function AppDetail() {
           </div>
         )}
         <VaultPassModal open={passOpen} onClose={() => setPassOpen(false)} />
+        {phoneOpen && <PhoneDownloadModal appId={app.id} title={app.title} version={app.version} onClose={() => setPhoneOpen(false)} />}
       </div>
     </TvShell>
   );
