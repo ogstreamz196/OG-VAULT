@@ -84,6 +84,7 @@ The system strictly enforces a 4-tier hierarchy across the database (RLS `can_br
 - **APK Install Flow (`src/lib/native-install.ts`):**
   - Native: Downloads APK to cache via `Filesystem.downloadFile`, triggers installer via `FileOpener.open` with `application/vnd.android.package-archive`.
   - Web: Falls back to direct browser download.
+- **Download to my Android phone:** every app page also offers a QR code that downloads that one app to the viewer's phone through an encrypted, expiring link (`src/lib/phone-link.ts`, route `src/routes/api/public/dl.$token.ts`). Never put raw APK URLs or app ids in a QR link.
 
 ---
 

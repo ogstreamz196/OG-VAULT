@@ -17,6 +17,7 @@ import { Route as UpdatesRouteImport } from './routes/updates'
 import { Route as AppIdRouteImport } from './routes/app.$id'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as ApiPublicVaultSyncCronRouteImport } from './routes/api/public/vault-sync-cron'
+import { Route as ApiPublicDlTokenRouteImport } from './routes/api/public/dl.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const ApiPublicVaultSyncCronRoute = ApiPublicVaultSyncCronRouteImport.update({
   path: '/api/public/vault-sync-cron',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDlTokenRoute = ApiPublicDlTokenRouteImport.update({
+  id: '/api/public/dl/$token',
+  path: '/api/public/dl/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
+  '/api/public/dl/$token': typeof ApiPublicDlTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
+  '/api/public/dl/$token': typeof ApiPublicDlTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/app/$id': typeof AppIdRoute
   '/category/$slug': typeof CategorySlugRoute
   '/api/public/vault-sync-cron': typeof ApiPublicVaultSyncCronRoute
+  '/api/public/dl/$token': typeof ApiPublicDlTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
+    | '/api/public/dl/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
+    | '/api/public/dl/$token'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/app/$id'
     | '/category/$slug'
     | '/api/public/vault-sync-cron'
+    | '/api/public/dl/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   AppIdRoute: typeof AppIdRoute
   CategorySlugRoute: typeof CategorySlugRoute
   ApiPublicVaultSyncCronRoute: typeof ApiPublicVaultSyncCronRoute
+  ApiPublicDlTokenRoute: typeof ApiPublicDlTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicVaultSyncCronRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/dl/$token': {
+      id: '/api/public/dl/$token'
+      path: '/api/public/dl/$token'
+      fullPath: '/api/public/dl/$token'
+      preLoaderRoute: typeof ApiPublicDlTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppIdRoute: AppIdRoute,
   CategorySlugRoute: CategorySlugRoute,
   ApiPublicVaultSyncCronRoute: ApiPublicVaultSyncCronRoute,
+  ApiPublicDlTokenRoute: ApiPublicDlTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
