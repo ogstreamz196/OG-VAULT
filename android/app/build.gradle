@@ -1,5 +1,14 @@
 apply plugin: 'com.android.application'
 
+// Release signing. Play Protect warns about (or blocks) APKs signed with the debug key, so store
+// APKs must be built with `./gradlew assembleRelease` using our own keystore. Keep the keystore and
+// android/keystore.properties out of git; CI can pass the same values as environment variables.
+def keystoreProps = new Properties()
+def keystorePropsFile = rootProject.file('keystore.properties')
+if (keystorePropsFile.exists()) keystorePropsFile.withInputStream { keystoreProps.load(it) }
+def signingValue = { String key, String env -> keystoreProps.getProperty(key) ?: System.getenv(env) }
+def releaseStoreFile = signingValue('storeFile', 'OGVAULT_KEYSTORE')
+
 android {
     namespace = "og.vault"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -18,8 +27,19 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (releaseStoreFile) {
+                storeFile = rootProject.file(releaseStoreFile)
+                storePassword = signingValue('storePassword', 'OGVAULT_KEYSTORE_PASSWORD')
+                keyAlias = signingValue('keyAlias', 'OGVAULT_KEY_ALIAS')
+                keyPassword = signingValue('keyPassword', 'OGVAULT_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
         release {
+            if (releaseStoreFile) signingConfig = signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
