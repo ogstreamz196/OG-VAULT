@@ -76,7 +76,8 @@ The system strictly enforces a 4-tier hierarchy across the database (RLS `can_br
 - **Native Plugins:**
   - `MainActivity.java` explicitly registers `AdbBridgePlugin`, `FilesystemPlugin`, and `FileOpenerPlugin` to ensure APK downloads work even without running `cap sync`.
   - Master copy of ADB Bridge is at `native/android/AdbBridgePlugin.java` — any changes must be mirrored to `android/app/src/main/java/og/vault/AdbBridgePlugin.java`.
-- **Permissions:** `QUERY_ALL_PACKAGES` is present in `AndroidManifest.xml` so the store can detect if target apps are installed locally and show "Open App" or "Re-install".
+- **Permissions:** The store detects installed apps ("Open App" / "Re-install") through the `<queries>` MAIN-intent block in `AndroidManifest.xml`. Do not add `QUERY_ALL_PACKAGES` back: Play Protect flags it on phones.
+- **Play Protect safety:** Store APKs must be release builds signed with our own keystore (`android/keystore.properties`, never committed), never the debug key. Backups are off and the FileProvider shares only the cache folder, so the ADB key never leaves the device.
 - **Artwork Assets:**
   - TV Banner: `drawable/tv_banner.png` (320x180) and `drawable-xhdpi/tv_banner.png` (640x360). The full, uncropped OG VAULT logo centred over a blurred, dimmed copy of itself.
   - Launcher Icons & Splashes: Generated with padded safe zones over `#040714` background without cropping the artwork.
